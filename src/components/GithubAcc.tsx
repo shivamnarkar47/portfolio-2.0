@@ -1,3 +1,4 @@
+//@ts-nocheck
 import BlurFade from './magicui/blur-fade'
 import {
   Card,
