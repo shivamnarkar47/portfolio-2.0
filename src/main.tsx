@@ -10,7 +10,7 @@ import { Octokit } from "octokit";
 import ErrorPage from "./components/ErrorPage.tsx";
 
 const octokit = new Octokit({
-  auth: "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"
+  auth: "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"
 })
 
 
@@ -26,7 +26,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/github",
-        element: <GithubAcc />,
+        element: <GithubAcc/>,
         loader: async () => {
           const user = await octokit.request('GET /user',
             {
