@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
@@ -8,9 +9,9 @@ import Hero from "./components/Hero.tsx";
 import GithubAcc from "./components/GithubAcc.tsx";
 import { Octokit } from "octokit";
 import ErrorPage from "./components/ErrorPage.tsx";
-
+import  {APIGITHUBKEY}  from "./lib/constant.js"
 const octokit = new Octokit({
-  auth: "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"
+  auth: import.meta.env.VITE_GITHUB_KEY 
 })
 
 
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    errorElement:<ErrorPage/>,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/",
@@ -26,7 +27,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/github",
-        element: <GithubAcc/>,
+        element: <GithubAcc />,
         loader: async () => {
           const user = await octokit.request('GET /user',
             {
