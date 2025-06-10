@@ -132,6 +132,11 @@ export const DATA = {
           href: "https://mini-url-shortener-ngee.vercel.app/",
           icon: <Icons.globe className="size-3" />,
         },
+        {
+          type: "Source",
+          href: "https://github.com/shivamnarkar47/MiniURL-shortener",
+          icon: <Icons.github className="size-3" />,
+        },
       ],
       image: "/miniurl.png",
       video: "#",
@@ -159,7 +164,7 @@ export const DATA = {
     {
       title: "Dinesmart - Food Ordering Simulation",
       href: "https://dinesmart-final.vercel.app/",
-      dates: "April 2023 - September 2023",
+      dates: "April 2024 - September 2024",
       active: true,
       description:
         "Built a Food Ordering System with React TS, Supabase, and Django, delivering a seamless dining experience. The app features real-time order management, a scalable backend, and an intuitive UI/UX. This project sharpened my full-stack and real-time development skills.",
@@ -180,7 +185,7 @@ export const DATA = {
         },
         {
           type: "Source",
-          href: "https://github.com/dillionverma/llm.report",
+          href: "https://github.com/shivamnarkar47/SE-MPL-B",
           icon: <Icons.github className="size-3" />,
         },
       ],
