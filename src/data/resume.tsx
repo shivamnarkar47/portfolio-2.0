@@ -134,7 +134,7 @@ export const DATA = {
         },
       ],
       image: "/miniurl.png",
-      video: "",
+      video: "#",
       // "https://pub-83c5db439b40468498f97946200806f7.r2.dev/chat-collect.mp4",
     },
     {
@@ -153,6 +153,7 @@ export const DATA = {
         },
       ],
       image: "/chihuahua.png",
+      video: "#",
       // video: "https://cdn.magicui.design/bento-grid.mp4",
     },
     {
@@ -184,6 +185,7 @@ export const DATA = {
         },
       ],
       image: "/dinesmart.png",
+      video: "#",
       // video: "https://cdn.llm.report/openai-demo.mp4",
     },
   ],
@@ -212,6 +214,7 @@ export const DATA = {
         "Developed the 'Chihuahua Smart City Dashboard' using React, Django, Celery and OpenWeatherMap API.",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxHradaY-0ZTjUj2VioBmT7Mj1alJ8mFbTcw&s",
+
       links: [
         {
           title: "Source",
