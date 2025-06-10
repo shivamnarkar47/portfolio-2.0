@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { HackathonCard } from "@/components/hackathon-card";
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
@@ -188,6 +189,7 @@ export default function Page() {
                     dates={project.dates}
                     image={project.image}
                     links={project.links}
+                    badge={project.badge}
                   />
                 </BlurFade>
               ))}

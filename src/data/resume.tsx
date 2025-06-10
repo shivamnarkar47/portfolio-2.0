@@ -20,7 +20,6 @@ export const DATA = {
     "Go",
     "Postgres",
     "Docker",
-    "Kubernetes",
     "Java",
     "C++",
   ],
@@ -203,6 +202,7 @@ export const DATA = {
         "Developed an platform where Spendings and donations of NGOs are transparent to the users with the help of Stellar Blockhain tech.",
       image:
         "https://hackhazards25.devfolio.co/_next/image?url=https%3A%2F%2Fassets.devfolio.co%2Fhackathons%2F2a2dfd8492574a2da83c47828270e0e1%2Fassets%2Ffavicon%2F920.png&w=1440&q=75",
+      badge: "#",
       links: [
         {
           title: "Source",
@@ -215,6 +215,7 @@ export const DATA = {
       title: "Coherence 3.0",
       dates: "Mar 29, 2025 - March 30, 2025",
       location: "VCET, Vasai(W)",
+      badge: "Finalist",
       description:
         "Developed the 'Chihuahua Smart City Dashboard' using React, Django, Celery and OpenWeatherMap API.",
       image:
@@ -234,6 +235,7 @@ export const DATA = {
       location: "SCOE, Kharghar",
       description:
         "Built an MVC-based investment platform supporting stocks, crypto, and insurance.",
+      badge: "Finalist & 1st runner up",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL6s9HQObXmvWKYeTfN0uKvNEWiWVFQ0tOUA&s",
       links: [
@@ -248,6 +250,7 @@ export const DATA = {
       title: "MumbaiHacks",
       dates: "Sep 21 2024 - Sep 22 2024",
       location: "Atlas Skills University, Mumbai",
+      badge: "#",
       description:
         "Developed a system which will check the adulteration of food using the image pic.",
       image:
@@ -264,6 +267,7 @@ export const DATA = {
       title: "CSI WebCade",
       dates: "Sep 14 2024 ",
       location: "SJCEM, Palghar",
+      badge: "#",
       description: "Developed a Cross Border Ecommerce Platform.",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyrvSYqKPdZ4F3ef48dVnWK2O9Thnmud-P8g&s",
@@ -280,6 +284,7 @@ export const DATA = {
       title: "Coherence 1.0",
       dates: "March 23, 2024 - March 24, 2024",
       location: "VCET, Vasai(W)",
+      badge: "Finalist",
       description:
         "Developed a Customer Virtual Assistant using Twillo and custom ML Model which helps in translation.",
       image:
@@ -290,6 +295,7 @@ export const DATA = {
       title: "H-2.0",
       dates: "March 20, 2024 - March 21, 2024",
       location: "DMCE, Airoli",
+      badge: "#",
       description:
         "Developed a system which will help to manage food waste from ceremonies to the NGOs.",
       image:
@@ -304,6 +310,7 @@ export const DATA = {
     },
     {
       title: "Technothon",
+      badge: "Finalist & Special Mention",
       dates: "April 18, 2023",
       location: "VES Polytechnic",
       description:
@@ -321,6 +328,7 @@ export const DATA = {
     {
       title: "Industrial Internal Hackathon",
       dates: "Mar 25, 2023",
+      badge: "#",
       location: "Vidyalankar Polytechnic",
       description:
         "Developed a system which will check the attendance by connecting the WiFi network of the office.",
