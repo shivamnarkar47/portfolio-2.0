@@ -33,19 +33,19 @@ export const DATA = {
     social: {
       GitHub: {
         name: "GitHub",
-        url: "https://miniurl-shortener.onrender.com/4SDyRq",
+        url: "https://github.com/shivamnarkar47/",
         icon: Icons.github,
         navbar: true,
       },
       LinkedIn: {
         name: "LinkedIn",
-        url: "https://miniurl-shortener.onrender.com/xaMMnn",
+        url: "https://www.linkedin.com/in/shivam-narkar/",
         icon: Icons.linkedin,
         navbar: true,
       },
       X: {
         name: "X",
-        url: "https://miniurl-shortener.onrender.com/Ei3xkG",
+        url: "https://x.com/linuxious",
         icon: Icons.x,
 
         navbar: true,
