@@ -56,12 +56,18 @@ export const DATA = {
         icon: Icons.resume,
         navbar: true,
       },
-      email: {
-        name: "Send Email",
-        url: "mailto:shivamnarkar16@gmail.com",
-        icon: Icons.email,
-        navbar: false,
+      Leetcode: {
+        name: "LeetCode",
+        url: "https://leetcode.com/u/shivamnarkar16",
+        icon: Icons.leetcode,
+        navbar: true,
       },
+      CodeForces: {
+        name: "CodeForces",
+        url: "https://codeforces.com/profile/destroyingchampions",
+        icon: Icons.barChart,
+        navbar: true
+      }
     },
   },
 
