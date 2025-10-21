@@ -72,10 +72,23 @@ export const DATA = {
   },
 
   work: [
+     {
+      company: "AIQ Space Ventures",
+      href: "https://aiqspace.com",
+      badges: ["internship", "Tech"],
+      location: "Hybrid",
+      title: "Tech Intern",
+      logoUrl: "/aiqspace.jpeg",
+      start: "Aug 2025",
+      end: "Sep 2025",
+      description:
+        "Contributed to product development and optimized internal workflows, resulting in a 28% increase in development speed. Collaborated with cross-functional teams to streamline deployment processes and enhance overall project efficiency.",
+    },
+
     {
       company: "Cybercraft Software Solutions",
       href: "https://cybercraft.llc",
-      badges: [],
+      badges: ["internship", "SDE"],
       location: "Hybrid",
       title: "Software Developer Intern",
       logoUrl: "/cybercraft.png",
@@ -87,7 +100,7 @@ export const DATA = {
     {
       company: "Sonawane Tech Solutions LLP",
       href: "https://sonawane.com",
-      badges: [],
+      badges: ["internship", "UI/UX"],
       location: "Hybrid",
       title: "UI/UX Intern",
       logoUrl: "/navrang.png",
@@ -96,6 +109,7 @@ export const DATA = {
       description:
         "During my internship as a UI/UX Developer, I designed and developed user-friendly interfaces for two key projects. First, I created a Cryptocurrency Trading Website layout, focusing on intuitive navigation and real-time data visualization. Second, I designed an E-Commerce Clothes Website, ensuring a seamless shopping experience with an attractive and responsive design. Both projects enhanced my skills in wireframing, prototyping, and user-centered design while meeting business and usability goal",
     },
+   
   ],
   education: [
     {
