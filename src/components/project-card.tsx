@@ -2,15 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Circle, CircleDot } from "lucide-react";
-import Image from "next/image";
+import { Circle } from "lucide-react";
 import Link from "next/link";
-import Markdown from "react-markdown";
 
 interface Props {
   title: string;
@@ -50,42 +47,23 @@ export function ProjectCard({
     >
       <Card
         className={
-          "flex flex-col overflow-hidden border pb-2 hover:shadow-lg transition-all duration-300 ease-out h-full"
+          "flex flex-col overflow-hidden border hover:shadow-md transition-all duration-300 ease-out h-full"
         }
       >
-
-        {active && <Badge className="absolute top-2 left-2  bg-green-500 dark:bg-green-800 dark:text-white scale-90"  ><Circle className="w-2 mr-1 fill-green-500 stroke-green-500 animate-pulse text-green-200" /> Running</Badge>}
-
-        {video != "#" && (
-          <video
-            src={video}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="pointer-events-none mx-auto h-40 w-full object-cover object-top" // needed because random black line at bottom of video
-          />
-        )}
-        {image && (
-          <Image
-            src={image}
-            alt={title}
-            width={500}
-            height={300}
-            className="h-40 w-full overflow-hidden object-cover object-top"
-          />
-        )}
-
         <CardHeader className="px-3 pt-3">
           <div className="space-y-1">
-            <CardTitle className="mt-1 text-base">{title}</CardTitle>
-            <time className="font-sans text-xs">{dates}</time>
-            <div className="hidden font-sans text-xs underline print:visible">
-              {link?.replace("https://", "").replace("www.", "").replace("/", "")}
+            <div className="flex items-center justify-between">
+              <CardTitle className="mt-1 text-base">{title}</CardTitle>
+              {active && (
+                <Badge className="text-xs bg-green-500 dark:bg-green-700">
+                  <Circle className="w-2 mr-1 fill-green-500" /> Running
+                </Badge>
+              )}
             </div>
-            <Markdown className="prose max-w-full text-pretty font-sans text-xs text-muted-foreground dark:prose-invert">
+            <time className="font-mono text-xs text-muted-foreground">{dates}</time>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {description}
-            </Markdown>
+            </p>
           </div>
         </CardHeader>
         <CardContent className="mt-auto flex flex-col px-3">
@@ -93,7 +71,7 @@ export function ProjectCard({
             <div className="mt-2 flex flex-wrap gap-1">
               {tags?.map((tag) => (
                 <Badge
-                  className="px-1 py-0 text-[10px]"
+                  className="text-xs"
                   variant="secondary"
                   key={tag}
                 >
@@ -103,23 +81,21 @@ export function ProjectCard({
             </div>
           )}
         </CardContent>
-        <CardFooter className="px-3 pb-2">
-          {links && links.length > 0 && (
+        {links && links.length > 0 && (
+          <CardContent className="px-3 pb-3">
             <div className="flex flex-row flex-wrap items-start gap-1">
               {links?.map((link, idx) => (
                 <Link href={link?.href} key={idx} target="_blank">
-                  <Badge key={idx} className="flex gap-2 px-2 py-1 text-[10px]">
+                  <Badge key={idx} className="flex gap-2 px-2 py-1 text-xs">
                     {link.icon}
                     {link.type}
                   </Badge>
                 </Link>
               ))}
             </div>
-          )}
-        </CardFooter>
-
+          </CardContent>
+        )}
       </Card>
     </Link>
-
   );
 }
