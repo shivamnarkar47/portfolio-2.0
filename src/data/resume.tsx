@@ -10,7 +10,7 @@ export const DATA = {
   description:
     "Student and Developer. I love building things and helping people. Life is too short to be boring.",
   summary: "",
-  avatarUrl: "/me.png",
+  avatarUrl: "",
   skills: [
     "React",
     "Next.js",
@@ -73,50 +73,55 @@ export const DATA = {
 
   work: [
      {
-      company: "AIQ Space Ventures",
-      href: "https://aiqspace.com",
-      badges: ["internship", "Tech"],
-      location: "Hybrid",
-      title: "Tech Intern",
-      logoUrl: "/aiqspace.jpeg",
-      start: "Aug 2025",
-      end: "Sep 2025",
-      description:
-        "Contributed to product development and optimized internal workflows, resulting in a 28% increase in development speed. Collaborated with cross-functional teams to streamline deployment processes and enhance overall project efficiency.",
-    },
+       company: "AIQ Space Ventures",
+       href: "https://aiqspace.com",
+       badges: ["internship", "Tech"],
+       location: "Hybrid",
+       title: "Tech Intern",
+       start: "Aug 2025",
+       end: "Sep 2025",
+       description: [
+         "Optimized internal workflows - 28% increase in development speed",
+         "Streamlined deployment processes with cross-functional teams",
+         "Enhanced overall project efficiency"
+       ]
+     },
 
     {
-      company: "Cybercraft Software Solutions",
-      href: "https://cybercraft.llc",
-      badges: ["internship", "SDE"],
-      location: "Hybrid",
-      title: "Software Developer Intern",
-      logoUrl: "/cybercraft.png",
-      start: "Sept 2024",
-      end: "Feb 2025",
-      description:
-        "Developed a Puppeteer-based bot to automate meeting connections, significantly improving scheduling efficiency. Additionally, I built a custom WebRTC meeting application, gaining hands-on experience with real-time communication technologies. To meet project requirements effectively, I explored various automated scheduling tools and successfully resolved development challenges, demonstrating strong problem-solving skills throughout the process.",
-    },
+       company: "Cybercraft Software Solutions",
+       href: "https://cybercraft.llc",
+       badges: ["internship", "SDE"],
+       location: "Hybrid",
+       title: "Software Developer Intern",
+       start: "Sept 2024",
+       end: "Feb 2025",
+       description: [
+         "Built Puppeteer-based bot for automated meeting connections",
+         "Developed custom WebRTC meeting application",
+         "Explored automated scheduling tools and resolved challenges"
+       ]
+     },
     {
-      company: "Sonawane Tech Solutions LLP",
-      href: "https://sonawane.com",
-      badges: ["internship", "UI/UX"],
-      location: "Hybrid",
-      title: "UI/UX Intern",
-      logoUrl: "/navrang.png",
-      start: "June 2022",
-      end: "Aug 2022",
-      description:
-        "During my internship as a UI/UX Developer, I designed and developed user-friendly interfaces for two key projects. First, I created a Cryptocurrency Trading Website layout, focusing on intuitive navigation and real-time data visualization. Second, I designed an E-Commerce Clothes Website, ensuring a seamless shopping experience with an attractive and responsive design. Both projects enhanced my skills in wireframing, prototyping, and user-centered design while meeting business and usability goal",
-    },
-   
+       company: "Sonawane Tech Solutions LLP",
+       href: "https://sonawane.com",
+       badges: ["internship", "UI/UX"],
+       location: "Hybrid",
+       title: "UI/UX Intern",
+       start: "June 2022",
+       end: "Aug 2022",
+       description: [
+         "Designed Cryptocurrency Trading Website layout",
+         "Created E-Commerce Clothes Website interface",
+         "Focused on wireframing, prototyping, and user-centered design"
+       ]
+     },
+    
   ],
   education: [
     {
       school: "Atharva College of Engineering",
       href: "https://atharvacoe.ac.in",
       degree: "Bachelor of Engineering in Information Technology",
-      logoUrl: "/atharva.png",
       start: "2023",
       end: "2026",
     },
@@ -124,7 +129,6 @@ export const DATA = {
       school: "Vidyalankar Polytechnic College",
       href: "https://vpt.edu.in",
       degree: "Diploma in Information Technology",
-      logoUrl: "/vp.png",
       start: "2020",
       end: "2023",
     },
@@ -157,9 +161,6 @@ export const DATA = {
           icon: <Icons.github className="size-3" />,
         },
       ],
-      image: "/racedash.png",
-      video: "#",
-      // video: "https://cdn.llm.report/openai-demo.mp4",
     },
     {
       title: "MiniURL Shortener",
@@ -188,9 +189,6 @@ export const DATA = {
           icon: <Icons.github className="size-3" />,
         },
       ],
-      image: "/miniurl.png",
-      video: "#",
-      // "https://pub-83c5db439b40468498f97946200806f7.r2.dev/chat-collect.mp4",
     },
     {
       title: "Chihuahua Investments",
@@ -207,9 +205,6 @@ export const DATA = {
           icon: <Icons.github className="size-3" />,
         },
       ],
-      image: "/chihuahua.png",
-      video: "#",
-      // video: "https://cdn.magicui.design/bento-grid.mp4",
     },
     {
       title: "Dinesmart - Food Ordering Simulation",
@@ -239,9 +234,6 @@ export const DATA = {
           icon: <Icons.github className="size-3" />,
         },
       ],
-      image: "/dinesmart.png",
-      video: "#",
-      // video: "https://cdn.llm.report/openai-demo.mp4",
     },
   ],
   hackathons: [
@@ -251,8 +243,6 @@ export const DATA = {
       location: "Online",
       description:
         "Developed an platform where Spendings and donations of NGOs are transparent to the users with the help of Stellar Blockhain tech.",
-      image:
-        "https://hackhazards25.devfolio.co/_next/image?url=https%3A%2F%2Fassets.devfolio.co%2Fhackathons%2F2a2dfd8492574a2da83c47828270e0e1%2Fassets%2Ffavicon%2F920.png&w=1440&q=75",
       badge: "#",
       links: [
         {
@@ -269,8 +259,6 @@ export const DATA = {
       badge: "Finalist",
       description:
         "Developed the 'Chihuahua Smart City Dashboard' using React, Django, Celery and OpenWeatherMap API.",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxHradaY-0ZTjUj2VioBmT7Mj1alJ8mFbTcw&s",
 
       links: [
         {
@@ -287,8 +275,6 @@ export const DATA = {
       description:
         "Built an MVC-based investment platform supporting stocks, crypto, and insurance.",
       badge: "Finalist & 1st runner up",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL6s9HQObXmvWKYeTfN0uKvNEWiWVFQ0tOUA&s",
       links: [
         {
           title: "Source",
@@ -304,8 +290,6 @@ export const DATA = {
       badge: "#",
       description:
         "Developed a system which will check the adulteration of food using the image pic.",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShsAPboPwHTs-I3OA8xHI_31_MXGTcAimepg&s",
       links: [
         {
           title: "Source",
@@ -320,8 +304,6 @@ export const DATA = {
       location: "SJCEM, Palghar",
       badge: "#",
       description: "Developed a Cross Border Ecommerce Platform.",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyrvSYqKPdZ4F3ef48dVnWK2O9Thnmud-P8g&s",
       links: [
         {
           title: "Source",
@@ -338,8 +320,6 @@ export const DATA = {
       badge: "Finalist",
       description:
         "Developed a Customer Virtual Assistant using Twillo and custom ML Model which helps in translation.",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxHradaY-0ZTjUj2VioBmT7Mj1alJ8mFbTcw&s",
       links: [],
     },
     {
@@ -349,8 +329,6 @@ export const DATA = {
       badge: "#",
       description:
         "Developed a system which will help to manage food waste from ceremonies to the NGOs.",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1tq-9vFRWExy9-hLnUYnMr1GPtfmZaSHIwA&s",
       links: [
         {
           title: "Source",
@@ -366,8 +344,6 @@ export const DATA = {
       location: "VES Polytechnic",
       description:
         "Developed a system which will help to manage food waste from ceremonies to the NGOs.",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSciRZKo1pFkqtdRZZPnKLJkKyHH9SVxKfcSA&s",
       links: [
         {
           title: "Source",
@@ -383,7 +359,6 @@ export const DATA = {
       location: "Vidyalankar Polytechnic",
       description:
         "Developed a system which will check the attendance by connecting the WiFi network of the office.",
-      image: "/vp.png",
       links: [],
     },
   ],
