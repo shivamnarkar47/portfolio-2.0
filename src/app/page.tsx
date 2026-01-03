@@ -27,27 +27,16 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="about">
-        <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <h2 className="text-xl font-bold mb-4">About</h2>
-        </BlurFade>
-        <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <p className="text-muted-foreground text-base leading-relaxed max-w-2xl">
-            {DATA.summary || "Passionate developer focused on building meaningful projects and learning new technologies."}
-          </p>
-        </BlurFade>
-      </section>
-
       <section id="work">
         <div className="flex min-h-0 flex-col gap-y-6">
-          <BlurFade delay={BLUR_FADE_DELAY * 5}>
+          <BlurFade delay={BLUR_FADE_DELAY * 3}>
             <h2 className="text-xl font-bold">Work Experience</h2>
           </BlurFade>
           <div className="flex flex-col gap-6">
             {DATA.work.map((work, id) => (
               <BlurFade
                 key={work.company}
-                delay={BLUR_FADE_DELAY * 6 + id * 0.05}
+                delay={BLUR_FADE_DELAY * 4 + id * 0.05}
               >
                 <Card className="border-l-2 border-l-foreground/20 px-4">
                   <CardHeader className="pb-3">
@@ -90,14 +79,14 @@ export default function Page() {
 
       <section id="education">
         <div className="flex min-h-0 flex-col gap-y-6">
-          <BlurFade delay={BLUR_FADE_DELAY * 7}>
+          <BlurFade delay={BLUR_FADE_DELAY * 5}>
             <h2 className="text-xl font-bold">Education</h2>
           </BlurFade>
           <div className="flex flex-col gap-6">
             {DATA.education.map((education, id) => (
               <BlurFade
                 key={education.school}
-                delay={BLUR_FADE_DELAY * 8 + id * 0.05}
+                delay={BLUR_FADE_DELAY * 6 + id * 0.05}
               >
                 <Card className="border-l-2 border-l-foreground/20 px-4">
                   <CardHeader className="pb-3">
@@ -122,12 +111,12 @@ export default function Page() {
 
       <section id="skills">
         <div className="flex min-h-0 flex-col gap-y-4">
-          <BlurFade delay={BLUR_FADE_DELAY * 9}>
+          <BlurFade delay={BLUR_FADE_DELAY * 7}>
             <h2 className="text-xl font-bold">Skills</h2>
           </BlurFade>
           <div className="flex flex-wrap gap-2">
             {DATA.skills.map((skill, id) => (
-              <BlurFade key={skill} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
+              <BlurFade key={skill} delay={BLUR_FADE_DELAY * 8 + id * 0.05}>
                 <Badge key={skill} variant="outline" className="font-mono text-sm px-3 py-1">
                   {skill}
                 </Badge>
@@ -139,14 +128,14 @@ export default function Page() {
 
       <section id="projects">
         <div className="w-full py-2">
-          <BlurFade delay={BLUR_FADE_DELAY * 11}>
+          <BlurFade delay={BLUR_FADE_DELAY * 9}>
             <h2 className="text-xl font-bold mb-6">Projects</h2>
           </BlurFade>
           <div className="flex flex-col gap-6">
             {DATA.projects.map((project, id) => (
               <BlurFade
                 key={project.title}
-                delay={BLUR_FADE_DELAY * 12 + id * 0.05}
+                delay={BLUR_FADE_DELAY * 10 + id * 0.05}
               >
                 <Card className="border-l-2 border-l-foreground/20 px-4">
                   <CardHeader className="pb-3">
@@ -195,14 +184,14 @@ export default function Page() {
 
       <section id="hackathons">
         <div className="w-full py-2">
-          <BlurFade delay={BLUR_FADE_DELAY * 13}>
+          <BlurFade delay={BLUR_FADE_DELAY * 11}>
             <h2 className="text-xl font-bold mb-6">Hackathons</h2>
           </BlurFade>
           <div className="flex flex-col gap-6">
             {DATA.hackathons.map((hackathon, id) => (
               <BlurFade
                 key={hackathon.title + hackathon.dates}
-                delay={BLUR_FADE_DELAY * 14 + id * 0.05}
+                delay={BLUR_FADE_DELAY * 12 + id * 0.05}
               >
                 <Card className="border-l-2 border-l-foreground/20 px-4">
                   <CardHeader className="pb-3">
@@ -248,7 +237,7 @@ export default function Page() {
 
       <section id="contact" className="pb-8">
         <div className="w-full py-2">
-          <BlurFade delay={BLUR_FADE_DELAY * 16}>
+          <BlurFade delay={BLUR_FADE_DELAY * 14}>
             <div className="space-y-4">
               <h2 className="text-xl font-bold">Contact</h2>
               <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
