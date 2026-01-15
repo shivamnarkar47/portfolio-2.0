@@ -9,6 +9,7 @@ export default function Navbar() {
       <div className="max-w-2xl mx-auto px-3 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
+            <p>shvm</p>
             <Link
               href="/"
               className={buttonVariants({ variant: "ghost", size: "icon-sm" })}

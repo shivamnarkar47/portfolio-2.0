@@ -4,6 +4,7 @@ import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DATA } from "@/data/resume";
+import { GitHubGraph } from "@/components/github-graph";
 import Link from "next/link";
 
 const BLUR_FADE_DELAY = 0.04;
@@ -24,6 +25,17 @@ export default function Page() {
             delay={BLUR_FADE_DELAY}
             text={DATA.description}
           />
+        </div>
+      </section>
+
+      <section id="github">
+        <div className="flex min-h-0 flex-col gap-y-4">
+          <BlurFade delay={BLUR_FADE_DELAY * 2}>
+            <h2 className="text-xl font-bold">GitHub Contributions</h2>
+          </BlurFade>
+          <BlurFade delay={BLUR_FADE_DELAY * 2.5}>
+            <GitHubGraph username="shivamnarkar47" accessToken={process.env.NEXT_GITHUB_TOKEN} />
+          </BlurFade>
         </div>
       </section>
 
