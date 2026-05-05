@@ -136,64 +136,6 @@ export const DATA = {
   projects: [
 
     {
-      title: "GreenVested",
-      href: "https://green-vested.vercel.app/",
-      dates: "Jan 2026 - Present",
-      active: true,
-      description:
-        "A full-stack ESG investing platform for the Indian stock market (BSE) featuring AI-powered real-time ESG scoring, portfolio simulation with Monte Carlo projections, ML-based return predictions, interactive visualizations with dark mode, and JWT-authenticated user accounts.",
-      technologies: [
-        "React TS",
-        "Next.js",
-        "TailwindCSS",
-        "Shadcn UI",
-        "Python",
-        "FastAPI",
-        "PostgreSQL",
-        "ML Models",
-        "JWT Auth",
-      ],
-      links: [
-        {
-          type: "Website",
-          href: "https://green-vested.vercel.app/",
-          icon: <Icons.globe className="size-3" />,
-        },
-        {
-          type: "Source",
-          href: "https://github.com/shivamnarkar47/GreenVested",
-          icon: <Icons.github className="size-3" />,
-        },
-      ],
-    },
-    {
-      title: "RaceDash - WEC Dashboard",
-      href: "https://wec-dashboard.vercel.app/",
-      dates: "June 2025 - August 2025",
-      active: true,
-      description:
-        "A cutting-edge motorsport analytics platform delivering live session data with millisecond precision.",
-      technologies: [
-        "React TS",
-        "GraphQL",
-        "TailwindCSS",
-        "Shadcn UI",
-        "Real-time"
-      ],
-      links: [
-        {
-          type: "Website",
-          href: "https://wec-dashboard.vercel.app/",
-          icon: <Icons.globe className="size-3" />,
-        },
-        {
-          type: "Source",
-          href: "https://github.com/shivamnarkar47/WEC_Dashboard",
-          icon: <Icons.github className="size-3" />,
-        },
-      ],
-    },
-    {
       title: "MiniURL Shortener",
       href: "https://mini-url-shortener-ngee.vercel.app/",
       dates: "May 2025 - Present",
