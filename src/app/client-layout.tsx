@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,12 +20,18 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   const [isLoading, setIsLoading] = useState(true);
+  const handleComplete = useCallback(() => setIsLoading(false), []);
 
   return (
-    <div className={cn("min-h-screen bg-background font-mono antialiased", fontMono.variable)}>
+    <div
+      className={cn(
+        "min-h-screen bg-background font-mono antialiased",
+        fontMono.variable,
+      )}
+    >
       <ThemeProvider attribute="class" defaultTheme="light">
         <TooltipProvider delayDuration={0}>
-          {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
+          {isLoading && <LoadingScreen onComplete={handleComplete} />}
           {!isLoading && (
             <>
               <Navbar />

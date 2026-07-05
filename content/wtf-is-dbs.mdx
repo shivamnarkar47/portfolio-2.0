@@ -1,0 +1,103 @@
+---
+title: "WTF is a DBS (Distributed System)?"
+publishedAt: "2026-07-06"
+summary: "A practical guide to understanding distributed systems, why they matter, and what actually makes them hard."
+---
+
+# WTF is a DBS?
+
+You've heard the term. You've seen it on job postings. "Distributed Systems" sounds important, expensive, and like something only FAANG engineers deal with.
+
+**It's not.**
+
+You're probably running a distributed system right now. This website is. Your phone talking to Instagram is. Your smart fridge checking if you're low on oat milk is.
+
+## The Simple Definition
+
+A distributed system is just **multiple computers working together** to achieve a common goal, while pretending to be one computer to the outside world.
+
+That's it. No magic. No blockchain required (though blockchain is one type of distributed system).
+
+## Why Distributed Systems Exist
+
+Three reasons:
+
+1. **Scale** — One computer can't handle it
+2. **Availability** — If one dies, others keep running
+3. **Latency** — Put data closer to users
+
+Netflix doesn't have one giant server. They have thousands. If one blows up in Virginia, your binge session continues uninterrupted.
+
+## The CAP Theorem
+
+Eric Brewer said you can only pick **two**:
+
+- **C**onsistency — Everyone sees the same data
+- **A**vailability — The system responds to every request
+- **P**artition tolerance — The system works when networks break
+
+Since networks always break, you really pick between **CP** or **AP**.
+
+- Banks? Usually **CP**. Your balance must be accurate.
+- Social media feeds? Usually **AP**. Stale posts are fine, downtime isn't.
+
+## The Hard Parts
+
+Distributed systems fail in ways single computers don't:
+
+| Problem          | Single Computer     | Distributed System       |
+| ---------------- | ------------------- | ------------------------ |
+| Clock sync       | Trivial             | Impossible               |
+| Network failures | Doesn't exist       | Constant                 |
+| Partial failures | Binary (works/dies) | Subtle (some parts work) |
+| Consensus        | One decision maker  | Agreement protocol       |
+
+### Network Partitions
+
+A partition happens when nodes can't talk to each other but both keep running. What if Node A and Node B both think they're the leader? **Split brain.**
+
+Solutions:
+
+- **Quorum-based voting** (need majority to operate)
+- **External coordination** (ZooKeeper, etcd)
+- **Accept divergence** (CRDTs, vector clocks)
+
+### The Two Generals Problem
+
+Two armies need to attack together. Messages can be intercepted. How do you guarantee coordination? **You can't.**
+
+This is why distributed consensus protocols (Paxos, Raft) are so complex.
+
+## Common Patterns
+
+**Leader-Follower:** One node handles writes, followers replicate. Simple, but leader is a bottleneck.
+
+**Leaderless:** Any node accepts writes. Conflicts resolved later. High availability, eventual consistency.
+
+**Sharding:** Split data across nodes (User A-M on Node 1, N-Z on Node 2). Infinite scale, but resharding is painful.
+
+**Consistent Hashing:** Instead of fixed shards, use hash rings. Adding/removing nodes only affects adjacent data.
+
+## What Actually Matters
+
+- **Idempotency** — Running something twice should be safe
+- **Timeouts and retries** — Networks are flaky
+- **Circuit breakers** — Fail fast, don't cascade
+- **Backpressure** — Slow down producers if consumers can't keep up
+- **Observability** — Distributed systems are impossible to debug without tracing
+
+## When to NOT Use Distributed Systems
+
+If you can fit on one machine, do. Distributed systems add operational complexity, network latency, and hard bugs that only show up under load.
+
+## Summary
+
+Distributed systems aren't magic. They're a compromise: accepting complexity to gain scale and resilience.
+
+Next time someone says "we need microservices," ask: "Do we actually have the problems microservices solve?"
+
+Usually the answer is no.
+
+---
+
+_Written by Shivam Narkar. Still learning. Always distributed._

@@ -34,7 +34,10 @@ export default function Page() {
             <h2 className="text-xl font-bold">GitHub Contributions</h2>
           </BlurFade>
           <BlurFade delay={BLUR_FADE_DELAY * 2.5}>
-            <GitHubGraph username="shivamnarkar47" accessToken={process.env.NEXT_GITHUB_TOKEN} />
+            <GitHubGraph
+              username="shivamnarkar47"
+              accessToken={process.env.NEXT_GITHUB_TOKEN}
+            />
           </BlurFade>
         </div>
       </section>
@@ -54,7 +57,11 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                       <CardTitle className="text-lg">
-                        <Link href={work.href} target="_blank" className="hover:underline">
+                        <Link
+                          href={work.href}
+                          target="_blank"
+                          className="hover:underline"
+                        >
                           {work.company}
                         </Link>
                       </CardTitle>
@@ -62,7 +69,9 @@ export default function Page() {
                         {work.start} - {work.end}
                       </span>
                     </div>
-                    <p className="text-base text-muted-foreground mt-1">{work.title}</p>
+                    <p className="text-base text-muted-foreground mt-1">
+                      {work.title}
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <ul className="list-disc list-inside space-y-1 text-base text-muted-foreground">
@@ -76,7 +85,11 @@ export default function Page() {
                     </ul>
                     <div className="flex flex-wrap gap-2 mt-4">
                       {work.badges.map((badge) => (
-                        <Badge key={badge} variant="secondary" className="text-sm">
+                        <Badge
+                          key={badge}
+                          variant="secondary"
+                          className="text-sm"
+                        >
                           {badge}
                         </Badge>
                       ))}
@@ -103,11 +116,17 @@ export default function Page() {
                 <Card className="border-l-2 border-l-foreground/20 px-4">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">
-                      <Link href={education.href} target="_blank" className="hover:underline">
+                      <Link
+                        href={education.href}
+                        target="_blank"
+                        className="hover:underline"
+                      >
                         {education.school}
                       </Link>
                     </CardTitle>
-                    <p className="text-base text-muted-foreground mt-1">{education.degree}</p>
+                    <p className="text-base text-muted-foreground mt-1">
+                      {education.degree}
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <span className="text-sm text-muted-foreground font-mono">
@@ -129,7 +148,11 @@ export default function Page() {
           <div className="flex flex-wrap gap-2">
             {DATA.skills.map((skill, id) => (
               <BlurFade key={skill} delay={BLUR_FADE_DELAY * 8 + id * 0.05}>
-                <Badge key={skill} variant="outline" className="font-mono text-sm px-3 py-1">
+                <Badge
+                  key={skill}
+                  variant="outline"
+                  className="font-mono text-sm px-3 py-1"
+                >
                   {skill}
                 </Badge>
               </BlurFade>
@@ -153,7 +176,11 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                       <CardTitle className="text-lg">
-                        <Link href={project.href} target="_blank" className="hover:underline">
+                        <Link
+                          href={project.href}
+                          target="_blank"
+                          className="hover:underline"
+                        >
                           {project.title}
                         </Link>
                       </CardTitle>
@@ -168,7 +195,11 @@ export default function Page() {
                     </p>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {project.technologies.map((tech) => (
-                        <Badge key={tech} variant="secondary" className="text-sm">
+                        <Badge
+                          key={tech}
+                          variant="secondary"
+                          className="text-sm"
+                        >
                           {tech}
                         </Badge>
                       ))}
@@ -208,7 +239,9 @@ export default function Page() {
                 <Card className="border-l-2 border-l-foreground/20 px-4">
                   <CardHeader className="pb-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                      <CardTitle className="text-lg">{hackathon.title}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {hackathon.title}
+                      </CardTitle>
                       <div className="flex items-center gap-2 flex-wrap">
                         {hackathon.badge && hackathon.badge !== "#" && (
                           <Badge variant="secondary" className="text-sm">
@@ -220,7 +253,9 @@ export default function Page() {
                         </span>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{hackathon.location}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {hackathon.location}
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <p className="text-base text-muted-foreground leading-relaxed mb-4">
@@ -241,6 +276,40 @@ export default function Page() {
                     </div>
                   </CardContent>
                 </Card>
+              </BlurFade>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="achievements">
+        <div className="flex min-h-0 flex-col gap-y-6">
+          <BlurFade delay={BLUR_FADE_DELAY * 15}>
+            <h2 className="text-xl font-bold">Achievements</h2>
+            <p className="text-sm text-muted-foreground">
+              Hackathon finalists, contributor recognitions, and milestone
+              achievements
+            </p>
+          </BlurFade>
+          <div className="flex flex-col gap-6">
+            {DATA.achievements.map((achievement, id) => (
+              <BlurFade
+                key={achievement.title + achievement.date}
+                delay={BLUR_FADE_DELAY * 16 + id * 0.03}
+              >
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-semibold text-base">
+                      {achievement.title}
+                    </h3>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {achievement.date}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {achievement.description}
+                  </p>
+                </div>
               </BlurFade>
             ))}
           </div>

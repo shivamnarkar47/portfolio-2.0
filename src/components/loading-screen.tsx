@@ -30,7 +30,6 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
         if (prev >= 100) {
           if (intervalRef.current) clearInterval(intervalRef.current);
           setIsComplete(true);
-          setTimeout(onComplete, 5000);
           return 100;
         }
         return prev + Math.random() * 12;
@@ -40,7 +39,14 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [onComplete]);
+  }, []);
+
+  useEffect(() => {
+    if (isComplete) {
+      const timeout = setTimeout(onComplete, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isComplete, onComplete]);
 
   useEffect(() => {
     const generateLines = () => {
@@ -67,17 +73,27 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
     <div className="fixed inset-0 z-50 bg-background/60 backdrop-blur-2xl border-x border-border/20 flex flex-col items-center justify-center overflow-hidden">
       <div className="w-full max-w-2xl px-4 sm:px-6">
         <div className="mb-8 sm:mb-12 font-mono text-[10px] xs:text-xs text-muted-foreground tracking-widest text-center">
-          {isComplete ? "COMPLETE // 100%" : `LOADING // ${progress.toFixed(0)}%`}
+          {isComplete
+            ? "COMPLETE // 100%"
+            : `LOADING // ${progress.toFixed(0)}%`}
         </div>
         <div className="relative h-40 sm:h-56 overflow-hidden mask-image-vignette">
-          <div className={isComplete ? "opacity-0 transition-opacity duration-1000" : "animate-marquee"}>
+          <div
+            className={
+              isComplete
+                ? "opacity-0 transition-opacity duration-1000"
+                : "animate-marquee"
+            }
+          >
             <div className="flex flex-col gap-2 sm:gap-3">
               {lines.map((line) => (
                 <div
                   key={line.id}
                   className="flex items-center gap-2 sm:gap-4 font-mono text-sm sm:text-xl md:text-2xl whitespace-nowrap"
                 >
-                  <span className="text-muted-foreground text-[10px] sm:text-xs">{line.index}</span>
+                  <span className="text-muted-foreground text-[10px] sm:text-xs">
+                    {line.index}
+                  </span>
                   <span className="text-foreground">{line.skills[0]}</span>
                   <span className="text-muted-foreground/30">/</span>
                   <span className="text-foreground">{line.skills[1]}</span>

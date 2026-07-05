@@ -1,5 +1,5 @@
 import { Icons } from "@/components/icons";
-import { HomeIcon, NotebookIcon } from "lucide-react";
+import { HomeIcon, NotebookIcon, BarChartIcon, ImagesIcon } from "lucide-react";
 
 export const DATA = {
   name: "Shivam Narkar",
@@ -8,7 +8,7 @@ export const DATA = {
   location: "Mumbai, Maharashtra",
   locationLink: "https://www.google.com/maps/place/mumbai",
   description:
-    "Student and Developer. I love building things and helping people. Life is too short to be boring.",
+    "Student, Developer, and Open Source Enthusiast. I love building scalable solutions and helping people learn. Life is too short to be boring.",
   summary: "",
   avatarUrl: "",
   skills: [
@@ -22,10 +22,23 @@ export const DATA = {
     "Docker",
     "Java",
     "C++",
+    "System Design",
+    "Cloud Computing",
+    "Machine Learning",
+    "WebRTC",
+    "Blockchain/Stellar",
+    "Framer Motion",
+    "TailwindCSS",
+    "shadcn/ui",
+    "Django",
+    "Celery",
+    "OpenWeatherMap",
   ],
   navbar: [
-    { href: "/", icon: HomeIcon, label: "Home" },
-    { href: "/blog", icon: NotebookIcon, label: "Blog" },
+    { href: "/", icon: (p: any) => <HomeIcon {...p} />, label: "Home" },
+    { href: "/blog", icon: (p: any) => <NotebookIcon {...p} />, label: "Blog" },
+    { href: "/stats", icon: BarChartIcon, label: "Stats" },
+    { href: "/showcase", icon: ImagesIcon, label: "Showcase" },
   ],
   contact: {
     email: "shivamnarkar16@gmail.com",
@@ -47,7 +60,6 @@ export const DATA = {
         name: "X",
         url: "https://x.com/linuxious",
         icon: Icons.x,
-
         navbar: true,
       },
       Resume: {
@@ -66,56 +78,53 @@ export const DATA = {
         name: "CodeForces",
         url: "https://codeforces.com/profile/destroyingchampions",
         icon: Icons.barChart,
-        navbar: true
-      }
+        navbar: true,
+      },
     },
   },
-
   work: [
-     {
-       company: "AIQ Space Ventures",
-       href: "https://aiqspace.com",
-       badges: ["internship", "Tech"],
-       location: "Hybrid",
-       title: "Tech Intern",
-       start: "Aug 2025",
-       end: "Sep 2025",
-       description: [
-         "Optimized internal workflows - 28% increase in development speed",
-         "Streamlined deployment processes with cross-functional teams",
-         "Enhanced overall project efficiency"
-       ]
-     },
-
     {
-       company: "Cybercraft Software Solutions",
-       href: "https://cybercraft.llc",
-       badges: ["internship", "SDE"],
-       location: "Hybrid",
-       title: "Software Developer Intern",
-       start: "Sept 2024",
-       end: "Feb 2025",
-       description: [
-         "Built Puppeteer-based bot for automated meeting connections",
-         "Developed custom WebRTC meeting application",
-         "Explored automated scheduling tools and resolved challenges"
-       ]
-     },
+      company: "AIQ Space Ventures",
+      href: "https://aiqspace.com",
+      badges: ["internship", "Tech"],
+      location: "Hybrid",
+      title: "Tech Intern",
+      start: "Aug 2025",
+      end: "Sep 2025",
+      description: [
+        "Optimized internal workflows - 28% increase in development speed",
+        "Streamlined deployment processes with cross-functional teams",
+        "Enhanced overall project efficiency",
+      ],
+    },
     {
-       company: "Sonawane Tech Solutions LLP",
-       href: "https://sonawane.com",
-       badges: ["internship", "UI/UX"],
-       location: "Hybrid",
-       title: "UI/UX Intern",
-       start: "June 2022",
-       end: "Aug 2022",
-       description: [
-         "Designed Cryptocurrency Trading Website layout",
-         "Created E-Commerce Clothes Website interface",
-         "Focused on wireframing, prototyping, and user-centered design"
-       ]
-     },
-    
+      company: "Cybercraft Software Solutions",
+      href: "https://cybercraft.llc",
+      badges: ["internship", "SDE"],
+      location: "Hybrid",
+      title: "Software Developer Intern",
+      start: "Sept 2024",
+      end: "Feb 2025",
+      description: [
+        "Built Puppeteer-based bot for automated meeting connections",
+        "Developed custom WebRTC meeting application",
+        "Explored automated scheduling tools and resolved challenges",
+      ],
+    },
+    {
+      company: "Sonawane Tech Solutions LLP",
+      href: "https://sonawane.com",
+      badges: ["internship", "UI/UX"],
+      location: "Hybrid",
+      title: "UI/UX Intern",
+      start: "June 2022",
+      end: "Aug 2022",
+      description: [
+        "Designed Cryptocurrency Trading Website layout",
+        "Created E-Commerce Clothes Website interface",
+        "Focused on wireframing, prototyping, and user-centered design",
+      ],
+    },
   ],
   education: [
     {
@@ -134,7 +143,6 @@ export const DATA = {
     },
   ],
   projects: [
-
     {
       title: "MiniURL Shortener",
       href: "https://mini-url-shortener-ngee.vercel.app/",
@@ -232,7 +240,6 @@ export const DATA = {
       badge: "Finalist",
       description:
         "Developed the 'Chihuahua Smart City Dashboard' using React, Django, Celery and OpenWeatherMap API.",
-
       links: [
         {
           title: "Source",
@@ -285,7 +292,6 @@ export const DATA = {
         },
       ],
     },
-
     {
       title: "Coherence 1.0",
       dates: "March 23, 2024 - March 24, 2024",
@@ -333,6 +339,40 @@ export const DATA = {
       description:
         "Developed a system which will check the attendance by connecting the WiFi network of the office.",
       links: [],
+    },
+  ],
+  achievements: [
+    {
+      title: "CodeCrafters 2nd Runner Up",
+      description:
+        "Built investment platform with Stocks, Crypto, Insurance in 24 hours",
+      date: "Mar 2025",
+    },
+    {
+      title: "Coherence 3.0 Finalist",
+      description: "Developed Smart City Dashboard with React, Django, Celery",
+      date: "Mar 2025",
+    },
+    {
+      title: "Coherence 1.0 Finalist",
+      description:
+        "Created Customer Virtual Assistant with Twilio and ML model",
+      date: "Mar 2024",
+    },
+    {
+      title: "Technothon Special Mention",
+      description: "Finalist with special recognition for achievements",
+      date: "Apr 2023",
+    },
+    {
+      title: "External Contributor",
+      description: "GitHub PRs merged across multiple repositories",
+      date: "2023",
+    },
+    {
+      title: "Open Source Enthusiast",
+      description: "PRs merged in multiple projects, technical documentation",
+      date: "2023-2025",
     },
   ],
 } as const;
