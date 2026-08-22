@@ -86,11 +86,25 @@ export const DATA = {
     {
       company: "AIQ Space Ventures",
       href: "https://aiqspace.com",
+      badges: ["full-time", "SDE"],
+      location: "Hybrid",
+      title: "Junior Software Developer",
+      start: "Jun 2026",
+      end: "Present",
+      description: [
+        "Working on scalable systems and optimizing development speed with sheer determination.",
+        "Designing and shipping production features across the stack, from API to UI",
+        "Collaborating with cross-functional teams to streamline deployment workflows",
+      ],
+    },
+    {
+      company: "AIQ Space Ventures",
+      href: "https://aiqspace.com",
       badges: ["internship", "Tech"],
       location: "Hybrid",
       title: "Tech Intern",
       start: "Aug 2025",
-      end: "Sep 2025",
+      end: "May 2026",
       description: [
         "Optimized internal workflows - 28% increase in development speed",
         "Streamlined deployment processes with cross-functional teams",
