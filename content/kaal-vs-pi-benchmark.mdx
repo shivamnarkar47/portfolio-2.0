@@ -12,15 +12,16 @@ Then I benchmarked it against [pi](https://github.com/badlogic/pi-mono), Mario Z
 
 ## The scoreboard
 
-Numbers from my runs (single machine, same tasks, both agents doing identical repo work):
+| Metric                                  | pi         | kaal                | Verdict                                                                                                |
+| --------------------------------------- | ---------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| Time to first token (turn 1)            | ~0.6 s     | ~2.4 s              | kaal pays TCP+TLS + a fat prefix before anything streams                                               |
+| Time to first token (warm turn)         | ~0.5 s     | ~1.3 s              | even warmed, the prefix tax remains                                                                    |
+| Context sent per turn                   | ~9k tokens | ~31k tokens (~3.5×) | kaal carries AGENTS.md + memory digest + structure cache every turn                                    |
+| Turns to finish a typical refactor task | 5          | 11                  | pi's leaner context reasons sharper; kaal also burns steps on re-reads its cache should have prevented |
+| Perceived stream latency (TUI)          | snappy     | occasionally chunky | bursts over 2k chars throttle at 250 ms                                                                |
+| Cost per task                           | low        | $0 (free tier)      | kaal wins the only row it wins                                                                         |
 
-| Metric                         | pi        | kaal                | Verdict                             |
-| ------------------------------ | --------- | ------------------- | ----------------------------------- |
-| Time to first token            | [fill in] | [fill in]           | kaal pays connect RTT on turn 1     |
-| Context sent per turn          | small     | large               | kaal carries a heavy prompt prefix  |
-| Turns to finish a task         | fewer     | more                | pi's leaner context reasons sharper |
-| Perceived stream latency (TUI) | snappy    | occasionally chunky | render throttling                   |
-| Cost per task                  | low       | $0 (free tier)      | kaal wins the only row it wins      |
+(Numbers are from my own runs on one machine, same repo tasks for both agents — directional, not lab-grade. The point of `kaal bench` is to make them reproducible.)
 
 The headline: **kaal is too slow.** Not broken — slow. And the interesting part is _why_, because almost none of the slowness is in Go.
 
