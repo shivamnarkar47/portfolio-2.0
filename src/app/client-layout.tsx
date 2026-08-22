@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,7 +20,8 @@ export default function AppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(pathname === "/");
   const handleComplete = useCallback(() => setIsLoading(false), []);
 
   return (
@@ -31,15 +33,11 @@ export default function AppLayout({
     >
       <ThemeProvider attribute="class" defaultTheme="light">
         <TooltipProvider delayDuration={0}>
+          <Navbar />
+          <div className="pt-16 sm:pt-20 px-4 sm:px-6 max-w-2xl mx-auto">
+            {children}
+          </div>
           {isLoading && <LoadingScreen onComplete={handleComplete} />}
-          {!isLoading && (
-            <>
-              <Navbar />
-              <div className="pt-16 sm:pt-20 px-4 sm:px-6 max-w-2xl mx-auto">
-                {children}
-              </div>
-            </>
-          )}
         </TooltipProvider>
       </ThemeProvider>
     </div>
