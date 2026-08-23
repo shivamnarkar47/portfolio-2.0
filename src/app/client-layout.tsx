@@ -7,14 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Heart } from "lucide-react";
-import { JetBrains_Mono as FontMono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { LoadingScreen } from "@/components/loading-screen";
-
-const fontMono = FontMono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
 
 export default function AppLayout({
   children,
@@ -28,8 +23,8 @@ export default function AppLayout({
   return (
     <div
       className={cn(
-        "min-h-screen bg-background font-mono antialiased",
-        fontMono.variable,
+        "min-h-screen bg-background font-sans antialiased",
+        GeistSans.variable,
       )}
     >
       <ThemeProvider attribute="class" defaultTheme="light">
