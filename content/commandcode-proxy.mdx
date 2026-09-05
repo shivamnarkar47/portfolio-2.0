@@ -1,0 +1,169 @@
+---
+title: "commandcode-proxy: Letting OpenCode Talk to CommandCode Go via Localhost"
+publishedAt: "2026-09-06"
+summary: "A zero-dependency Bun + TypeScript proxy that translates OpenAI Chat Completions into CommandCode's NDJSON wire protocol — so OpenCode can use CommandCode Go as a provider."
+---
+
+# commandcode-proxy
+
+A zero-dependency Bun + TypeScript proxy that translates between two worlds:
+
+- **Downstream:** OpenCode, speaking OpenAI Chat Completions (SSE or buffered JSON)
+- **Upstream:** CommandCode Go, speaking `POST /alpha/generate` (NDJSON)
+
+OpenCode can already hit any OpenAI-compatible endpoint. But CommandCode Go doesn't speak OpenAI — it speaks its own NDJSON streaming protocol. This proxy sits in between and translates both directions in real time.
+
+## The translation problem
+
+OpenAI's Chat Completions format is a _lingua franca_. Every coding agent supports it. But it's not universal.
+
+CommandCode Go's upstream API (`api.commandcode.ai/alpha/generate`) expects a different shape:
+
+| Concept   | OpenAI                                             | CommandCode Alpha                               |
+| --------- | -------------------------------------------------- | ----------------------------------------------- |
+| Messages  | `role: system/user/assistant/tool`                 | `ModelMessage[]` with typed `content` parts     |
+| Tools     | `{type: "function", function: {name, parameters}}` | `{name, description, input_schema}`             |
+| Streaming | SSE (`data: {...}\n\n`)                            | NDJSON (`{"type":"text-delta","text":"..."}\n`) |
+| Thinking  | `reasoning_effort` or `thinking.budget_tokens`     | `params.reasoningEffort` or `params.thinking`   |
+| Usage     | `prompt_tokens`, `completion_tokens`               | `inputTokens`, `outputTokens`                   |
+
+The proxy's job is to make these two shapes indistinguishable from each other.
+
+## Outbound: OpenAI → Alpha
+
+The translator (`src/translate.ts`) walks the OpenAI messages array and rebuilds it as `ModelMessage[]`:
+
+- `system`/`developer` messages collapse into a single `system` string
+- `user` messages with image content parts become `{type: "image", image: url, mediaType: ...}`
+- `assistant.tool_calls` become `{type: "tool-call", toolCallId, toolName, input}`
+- `tool` results get coalesced onto the previous tool-role message (so a batch of tool results ships as one `AlphaMessage`)
+
+Tools follow the same pattern — OpenAI's `{type: "function", function: {parameters}}` becomes `{name, description, input_schema}`.
+
+## Inbound: Alpha → OpenAI (the hard part)
+
+Upstream returns newline-delimited JSON, **not** SSE. Each line is a different event type:
+
+```
+{"type":"text-delta","text":"I'll "}
+{"type":"text-delta","text":"help with that."}
+{"type":"reasoning-delta","text":"Let me think about this..."}
+{"type":"tool-input-start","toolCallId":"call_abc","toolName":"read_file"}
+{"type":"tool-input-delta","toolCallId":"call_abc","delta":"{\"path\": \"src/proxy.ts\"}"}
+{"type":"finish-step","finishReason":"tool-calls","usage":{"inputTokens":1200,"outputTokens":45}}
+{"type":"finish","totalUsage":{"inputTokens":1200,"outputTokens":45}}
+```
+
+The proxy has to:
+
+1. **Accumulate streaming text** into `content` SSE deltas
+2. **Accumulate reasoning** into `reasoning_content` (also streamed)
+3. **Track tool-call state** — `tool-input-start` opens a call, `tool-input-delta` appends arguments, `tool-call` finalizes it
+4. **Buffer when needed** — if downstream asks `stream: false`, collect everything and return a single JSON blob
+
+The tricky bit: upstream emits `tool-call` as a final event. If it streamed argument deltas already (`tool-input-delta`), those deltas stay. If the whole argument arrives in the `tool-call` event (no deltas), the proxy emits the full arguments string in one SSE chunk. Both paths produce a valid OpenAI `tool_calls` array.
+
+## Zero deps
+
+No Express, no Fastify, noHono. Just `Bun.serve` and `node:path`/`node:os` for the service installer. The whole thing is:
+
+- `proxy.ts` — server, routing, key resolution, streaming
+- `translate.ts` — pure translation functions
+- `types.ts` — wire protocol types (OpenAI + Alpha + NDJSON)
+- `setup.ts` — systemd/launchd/Windows task installer
+
+That's it. No framework, no middleware, no dependency tree to audit.
+
+## Key resolution
+
+The proxy resolves the CommandCode API key in order:
+
+1. `COMMANDCODE_API_KEY` environment variable
+2. `Authorization: Bearer <key>` header (OpenCode forwards the `/connect` key here)
+3. `~/.local/share/opencode/auth.json` — looks up `commandcode`, `commandcode-go`, or `opencode-go` entries
+
+This means you can run OpenCode, hit `/connect` once, and the proxy picks up the key automatically. No env vars to manage, no config files to edit.
+
+## Service install
+
+`bun run src/setup.ts` does the whole thing:
+
+1. Copies proxy sources to `~/.config/opencode/commandcode-proxy/`
+2. Merges a `commandcode` provider block into your `opencode.json(c)`
+3. Installs a systemd user service (Linux), launchd agent (macOS), or scheduled task (Windows)
+4. Verifies the proxy is live — falls back to a background daemon if the service doesn't come up
+
+Uninstall is `bun run uninstall` (full removal) or `bun run src/setup.ts --uninstall` (service only).
+
+## Thinking and reasoning
+
+CommandCode Go supports thinking variants per model. The proxy passes `thinking` and `reasoning_effort` through to upstream, and accumulates `reasoning-delta` events into `reasoning_content` on the assistant message.
+
+In `opencode.json`, you define variants per model:
+
+```jsonc
+{
+  "providers": {
+    "commandcode": {
+      "models": {
+        "deepseek/deepseek-v4-flash": {
+          "variants": [
+            { "id": "low", "settings": { "reasoningEffort": "low" } },
+            { "id": "medium", "settings": { "reasoningEffort": "medium" } },
+            { "id": "high", "settings": { "reasoningEffort": "high" } },
+            {
+              "id": "max",
+              "settings": {
+                "reasoningEffort": "high",
+                "thinking": { "type": "enabled", "budget_tokens": 16000 },
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
+}
+```
+
+Select at runtime with `commandcode/deepseek/deepseek-v4-flash#max`.
+
+## Benchmarks
+
+Local proxy overhead (2026-09-05, Linux, Bun 1.4.0, localhost):
+
+| Metric                               | Value                               |
+| ------------------------------------ | ----------------------------------- |
+| Cold start → first healthy `/health` | ~47 ms                              |
+| `GET /health` latency, p50 / p95     | 246 µs / 752 µs (n=100, in-process) |
+
+The proxy adds negligible latency — most of the time is the upstream round trip.
+
+## Why build this?
+
+OpenCode is a great coding agent. CommandCode Go has models OpenCode can't reach directly. Rather than fork OpenCode or wait for upstream support, a local proxy is the seam between them.
+
+It's the same pattern as [pi-relace-provider](https://github.com/snarkar-aiq/portfolio-2.0/blob/main/content/relace-meets-pi.mdx) — a thin translation layer that makes two systems compatible without either one knowing about the other. No lock-in, no vendor SDK, no fork. Just a proxy.
+
+## Try it
+
+```sh
+git clone https://github.com/snarkar-aiq/commandcode-proxy.git ~/.config/opencode/commandcode-proxy
+cd ~/.config/opencode/commandcode-proxy
+bun install
+bun run src/setup.ts
+```
+
+Restart OpenCode or press F5. The `commandcode` provider shows up in `/models`.
+
+Or run without installing:
+
+```sh
+bun run src/proxy.ts --port 18731
+```
+
+Then point OpenCode at `http://127.0.0.1:18731/v1`.
+
+---
+
+_Shivam Narkar. Building seams between systems that don't natively talk._
