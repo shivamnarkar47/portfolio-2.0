@@ -158,6 +158,31 @@ export const DATA = {
   ],
   projects: [
     {
+      title: "commandcode-proxy",
+      href: "https://github.com/shivamnarkar47/commandcode-proxy",
+      dates: "September 2026 - Present",
+      active: true,
+      description:
+        "A zero-dependency Bun + TypeScript proxy that lets OpenCode talk to CommandCode Go via a local OpenAI-compatible endpoint. Translates OpenAI Chat Completions into CommandCode's NDJSON wire protocol and back — streaming text, reasoning, tool calls, and usage in both directions. Ships a one-command installer that registers a systemd/launchd/Windows service, resolves API keys from env/Bearer/auth.json, and supports thinking variants per model.",
+      technologies: [
+        "Bun",
+        "TypeScript",
+        "OpenAI Chat Completions",
+        "NDJSON",
+        "SSE",
+        "systemd",
+        "launchd",
+        "Windows Task Scheduler",
+      ],
+      links: [
+        {
+          type: "Source",
+          href: "https://github.com/shivamnarkar47/commandcode-proxy",
+          icon: <Icons.github className="size-3" />,
+        },
+      ],
+    },
+    {
       title: "kaal",
       href: "https://github.com/shivamnarkar47/kaal",
       dates: "August 2026 - Present",
@@ -183,10 +208,10 @@ export const DATA = {
     {
       title: "omarchy-hotspot",
       href: "https://github.com/shivamnarkar47/omarchy-hotspot",
-      dates: "August 2026",
+      dates: "August 2026 - September 2026",
       active: false,
       description:
-        "A mobile hotspot for Omarchy/Hyprland that never drops your Wi-Fi: concurrent STA+AP via hostapd on a virtual interface, sharing any uplink through iptables NAT while your connection stays up. Ships a Quickshell bar plugin with an interactive panel — scannable QR-code join, live status, inline-editable WPA2 password, and passwordless toggling via a scoped polkit rule.",
+        "A mobile hotspot for Omarchy/Hyprland that never drops your Wi-Fi: concurrent STA+AP via hostapd on a virtual interface, sharing any uplink through iptables NAT while your connection stays up. Ships a Quickshell bar plugin with an interactive panel — scannable QR-code join, live status, inline-editable SSID and WPA2 password, failure surfacing on startup errors, and passwordless toggling via a scoped polkit rule. Hardened against a security review: passphrase validation, stdin-only secret handling, polkit rule scoping, and QML plaintext rendering.",
       technologies: [
         "QML / Quickshell",
         "Bash",
