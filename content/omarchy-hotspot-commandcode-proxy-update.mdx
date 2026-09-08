@@ -1,0 +1,98 @@
+---
+title: "omarchy-hotspot & commandcode-proxy: Hardening, Inline Editing, and a Production Push"
+publishedAt: "2026-09-09"
+summary: "Two recent updates: the hotspot plugin got a security review response, an inline SSID editor, and failure surfacing; the proxy landed service install, Windows parity, unit tests, and agent skills."
+---
+
+Two repos, two different problems. The latest work on each is worth capturing before it scatters.
+
+## omarchy-hotspot: hardening and a friendlier panel
+
+[omarchy-hotspot](https://github.com/shivamnarkar47/omarchy-hotspot) — the one-click mobile hotspot for Omarchy — shipped a batch of fixes after a security review, plus a couple of usability features that should have been there from the start.
+
+### Security hardening (8 fixes)
+
+A marketplace review surfaced real issues. The fixes went in across three commits and are documented in [`docs/SECURITY.md`](https://github.com/shivamnarkar47/omarchy-hotspot/blob/main/docs/SECURITY.md). The most consequential:
+
+| #   | Issue                                                                             | Fix                                                                                                    |
+| --- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1   | `install.sh` resolved the wrong user for the polkit rule                          | Resolves real caller via `PKEXEC_UID` with fallbacks, scoped to both helper binary and installing user |
+| 2   | Unbounded passphrases injected into `hostapd.conf`, password file world-readable  | Validates 8–63 printable ASCII bytes, writes secret file `600` owned by the installing user            |
+| 3   | Helper output rendered with rich-text formatting                                  | All helper-derived `Text` elements use `textFormat: Text.PlainText`                                    |
+| 4   | Passphrase passed as `set-password` argv                                          | Reads from stdin; the panel feeds it over the `Process` stdin channel                                  |
+| 5   | `status` echoed the passphrase back over stdout                                   | Bar reads directly from the user-owned secret file instead                                             |
+| 6   | Diagnostic subcommands (`debug`/`sniff`/`test`) reachable via passwordless pkexec | Restricted to `status`/`toggle`/`set-password`; diagnostics remain available via `sudo`                |
+| 7   | Username interpolated into a `sed` replacement                                    | Polkit rule generated with `awk -v` as a fixed string                                                  |
+| 8   | WIFI QR payload missing `"` escaping                                              | `qr.sh` now escapes `"` per the standard                                                               |
+
+The threat model is narrow: a scoped, passwordless polkit rule that authorizes _only_ the helper for _only_ the installing user. No network fetches, no `eval`, no world-writable temp files.
+
+### Inline SSID editor
+
+You can now rename the hotspot from the panel itself. Pencil icon next to the name → inline text field → Enter to save, Escape to cancel. The QR regenerates immediately on save. Same flow already existed for the password; SSID editing was the missing half.
+
+### Failure surfacing
+
+When the hotspot fails to start, the panel now shows a red **HOTSPOT FAILED TO START** banner with the reason — instead of staying silent. The error clears on the next successful toggle. Previously a failure looked identical to "nothing happened," which sent people to the journal when the answer was right in front of them.
+
+### Other changes
+
+- **Scoped IPv6 resolver fix** — dnsmasq now ignores resolvers scoped to the hotspot interface, stopping spurious upstream failures (#4).
+- **Bug report template** — asks for steps to reproduce, environment, and `journalctl` output upfront.
+- **CONTRIBUTING.md** — documents the code style, shellcheck requirement, and manual testing expectations.
+
+---
+
+## commandcode-proxy: from demo to installable
+
+[commandcode-proxy](https://github.com/shivamnarkar47/commandcode-proxy) — the OpenAI → CommandCode `/alpha/generate` shim — went from "works on my machine" to "install and forget" in the last week.
+
+### Service install that survives reboots
+
+`bun run src/setup.ts` now installs the proxy as a proper system service:
+
+- **Linux** — systemd user service (`Restart=on-failure`, `RestartSec=3`)
+- **macOS** — launchd agent (`KeepAlive: true`, `RunAtLoad: true`)
+- **Windows** — scheduled task (logon trigger, restart on failure)
+
+Setup verifies the proxy came up afterward. If the service doesn't start (missing polkit, policy conflict), it falls back to a background daemon — so the proxy is live on first go either way.
+
+### The `idleTimeout` saga
+
+SSE streams need long-lived connections. Bun's `idleTimeout` caps how long the server waits for data before dropping the socket. Two fixes landed:
+
+1. Bumped to **300s** so long tool-call generations don't get dropped mid-stream.
+2. Capped at **255s** on Windows — Bun enforces a hard maximum there, and a value above 255 caused the server to refuse to start on Windows. The code picks `min(300, maxBunTimeout)` per platform.
+
+### Unit tests
+
+The translation layer (`src/translate.ts`) has unit tests now, covering:
+
+- `tool_calls` finish reason normalization (upstream emits `tool-calls`, OpenAI expects `tool_calls`)
+- NDJSON tail parsing (last line without a trailing newline)
+- JSONC-preserving config merge (comments and formatting survive the surgical edit)
+- argv array safety (no shell injection via model names)
+
+These are the failure modes that matter — edge cases where a stringly-typed wire format bites you at 2 AM.
+
+### Background runner
+
+`bun run proxy.ts --daemon` starts detached with a PID file and log. `--status`, `--stop`, and `--restart` do what you'd expect. Stale PID files self-heal (an alive-check guard before the daemon writes its PID, plus cleanup in `--stop`). Double-start is refused rather than crashing with `EADDRINUSE` and orphaning the original.
+
+### Agent skills
+
+The repo now has agent skills configured — an issue tracker via `gh`, five canonical triage labels, and a single-context domain doc (`CONTEXT.md` + `docs/adr/`). This means skills that depend on issue tracking (triage, code-review, wayfinder) can operate on this repo without hand-holding.
+
+---
+
+## What's next
+
+The hotspot is in a good place — the security review is answered, the panel is complete, and the install is two commands. The next ideas (client list with MACs, per-client bandwidth, scheduled on/off) are feature work, not cleanup.
+
+The proxy's foundation is solid: service install, Windows parity, unit tests, documented benchmarks and smoke tests. The remaining gap is end-to-end generation benchmarks — needs an upstream `COMMANDCODE_API_KEY` to measure time-to-first-token and tokens-per-second per model. Contributions welcome if you have one.
+
+Both repos follow the same philosophy: a thin layer that makes two systems compatible without either knowing about the other. A hotspot plugin that speaks `pkexec` to a system helper. A proxy that speaks OpenAI to a non-OpenAI backend. No forks, no lock-in, no magic.
+
+---
+
+_Shivam Narkar. Building seams between systems that don't natively talk._
