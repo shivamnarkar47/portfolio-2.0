@@ -42,15 +42,39 @@ async function fetchGitHub(): Promise<Stat[]> {
   if (!userRes.ok) throw new Error(`GitHub user ${userRes.status}`);
   const user = (await userRes.json()) as {
     followers: number;
+    following: number;
     public_repos: number;
     public_gists: number;
+    created_at: string;
   };
 
   let totalStars = 0;
+  let totalForks = 0;
+  const languageCounts: Record<string, number> = {};
   if (reposRes.ok) {
-    const repos = (await reposRes.json()) as { stargazers_count: number }[];
+    const repos = (await reposRes.json()) as {
+      stargazers_count: number;
+      forks_count: number;
+      language: string | null;
+    }[];
     totalStars = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
+    totalForks = repos.reduce((sum, r) => sum + (r.forks_count ?? 0), 0);
+    for (const r of repos) {
+      if (r.language) {
+        languageCounts[r.language] = (languageCounts[r.language] ?? 0) + 1;
+      }
+    }
   }
+
+  const topLanguages = Object.entries(languageCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([lang, count]) => `${lang} (${count})`)
+    .join(", ");
+
+  const yearsOnGitHub = Math.floor(
+    (Date.now() - new Date(user.created_at).getTime()) / (365.25 * 24 * 60 * 60 * 1000),
+  );
 
   // Fetch real commit data via GraphQL (requires token for full history)
   let totalCommits = 0;
@@ -167,22 +191,33 @@ async function fetchGitHub(): Promise<Stat[]> {
       source: "github",
       label: "Followers",
       value: user.followers,
+      hint: `following ${user.following}`,
       url: `https://github.com/${GITHUB_USER}`,
     },
     {
       source: "github",
       label: "Repositories",
       value: user.public_repos,
+      hint: `${yearsOnGitHub} years on GitHub`,
       url: `https://github.com/${GITHUB_USER}?tab=repositories`,
     },
     {
       source: "github",
       label: "Total Stars",
       value: totalStars,
-      hint: "across public repos",
+      hint: `${totalForks} forks`,
       url: `https://github.com/${GITHUB_USER}?tab=repositories`,
     },
   ];
+
+  if (topLanguages) {
+    stats.push({
+      source: "github",
+      label: "Top Languages",
+      value: topLanguages,
+      url: `https://github.com/${GITHUB_USER}?tab=repositories`,
+    });
+  }
 
   if (token) {
     stats.push(
@@ -240,6 +275,7 @@ async function fetchLeetCode(): Promise<Stat[]> {
           username
           profile { ranking reputation }
           submitStats { acSubmissionNum { difficulty count } }
+          userContestRanking { attendedCount rating }
         }
       }`,
       variables: { username: LEETCODE_USER },
@@ -254,6 +290,7 @@ async function fetchLeetCode(): Promise<Stat[]> {
         submitStats: {
           acSubmissionNum: { difficulty: string; count: number }[];
         };
+        userContestRanking: { attendedCount: number; rating: number } | null;
       } | null;
     };
   };
@@ -262,7 +299,7 @@ async function fetchLeetCode(): Promise<Stat[]> {
   const byDiff = Object.fromEntries(
     u.submitStats.acSubmissionNum.map((s) => [s.difficulty, s.count]),
   );
-  return [
+  const stats: Stat[] = [
     {
       source: "leetcode",
       label: "Contest Ranking",
@@ -284,15 +321,32 @@ async function fetchLeetCode(): Promise<Stat[]> {
       url: `https://leetcode.com/u/${LEETCODE_USER}/`,
     },
   ];
+  if (u.userContestRanking) {
+    stats.push({
+      source: "leetcode",
+      label: "Contests",
+      value: u.userContestRanking.attendedCount,
+      hint: `rating ${u.userContestRanking.rating.toFixed(0)}`,
+      url: `https://leetcode.com/u/${LEETCODE_USER}/`,
+    });
+  }
+  return stats;
 }
 
 async function fetchCodeForces(): Promise<Stat[]> {
-  const res = await fetch(
-    `https://codeforces.com/api/user.info?handles=${CODEFORCES_USER}`,
-    { next: { revalidate: 600 } },
-  );
-  if (!res.ok) throw new Error(`CodeForces ${res.status}`);
-  const json = (await res.json()) as {
+  const [infoRes, submissionsRes] = await Promise.all([
+    fetch(
+      `https://codeforces.com/api/user.info?handles=${CODEFORCES_USER}`,
+      { next: { revalidate: 600 } },
+    ),
+    fetch(
+      `https://codeforces.com/api/user.status?handle=${CODEFORCES_USER}&from=1&count=1000`,
+      { next: { revalidate: 600 } },
+    ),
+  ]);
+
+  if (!infoRes.ok) throw new Error(`CodeForces ${infoRes.status}`);
+  const json = (await infoRes.json()) as {
     result: {
       rating?: number;
       rank?: string;
@@ -300,10 +354,32 @@ async function fetchCodeForces(): Promise<Stat[]> {
       maxRank?: string;
       contribution?: number;
       friendOfCount?: number;
+      organization?: string;
     }[];
   };
   const u = json.result?.[0];
   if (!u) throw new Error("CodeForces user not found");
+
+  // Count accepted submissions and unique solved problems
+  let acceptedSubmissions = 0;
+  let solvedProblems = 0;
+  if (submissionsRes.ok) {
+    const subJson = (await submissionsRes.json()) as {
+      result: { verdict: string; problem: { contestId?: number; index: string } }[];
+    };
+    const solvedSet = new Set<string>();
+    for (const s of subJson.result ?? []) {
+      if (s.verdict === "OK") {
+        acceptedSubmissions++;
+        const key = s.problem.contestId
+          ? `${s.problem.contestId}${s.problem.index}`
+          : s.problem.index;
+        solvedSet.add(key);
+      }
+    }
+    solvedProblems = solvedSet.size;
+  }
+
   return [
     {
       source: "codeforces",
@@ -317,6 +393,13 @@ async function fetchCodeForces(): Promise<Stat[]> {
       label: "Peak Rating",
       value: u.maxRating ?? "N/A",
       hint: u.maxRank ?? undefined,
+      url: `https://codeforces.com/profile/${CODEFORCES_USER}`,
+    },
+    {
+      source: "codeforces",
+      label: "Solved Problems",
+      value: solvedProblems,
+      hint: `${acceptedSubmissions} accepted submissions`,
       url: `https://codeforces.com/profile/${CODEFORCES_USER}`,
     },
     {
