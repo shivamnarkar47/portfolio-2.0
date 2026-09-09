@@ -21,14 +21,14 @@ type StatsResponse = {
 };
 
 async function fetchGitHub(): Promise<Stat[]> {
+  const token = process.env.GITHUB_TOKEN;
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-  if (process.env.GITHUB_TOKEN)
-    headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const [userRes, reposRes, eventsRes] = await Promise.all([
+  const [userRes, reposRes] = await Promise.all([
     fetch(`https://api.github.com/users/${GITHUB_USER}`, {
       headers,
       next: { revalidate: 300 },
@@ -37,10 +37,6 @@ async function fetchGitHub(): Promise<Stat[]> {
       `https://api.github.com/users/${GITHUB_USER}/repos?per_page=100&type=owner&sort=updated`,
       { headers, next: { revalidate: 300 } },
     ),
-    fetch(`https://api.github.com/users/${GITHUB_USER}/events?per_page=100`, {
-      headers,
-      next: { revalidate: 300 },
-    }),
   ]);
 
   if (!userRes.ok) throw new Error(`GitHub user ${userRes.status}`);
@@ -56,19 +52,102 @@ async function fetchGitHub(): Promise<Stat[]> {
     totalStars = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
   }
 
-  // Approximate public commit count from events (push events in last 90 days)
+  // Fetch real commit data via GraphQL (requires token for full history)
+  let totalCommits = 0;
   let recentCommits = 0;
-  if (eventsRes.ok) {
-    const events = (await eventsRes.json()) as {
-      type: string;
-      payload: { size?: number };
-    }[];
-    recentCommits = events
-      .filter((e) => e.type === "PushEvent")
-      .reduce((sum, e) => sum + (e.payload?.size ?? 0), 0);
+  let streak = 0;
+
+  if (token) {
+    const graphqlRes = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query($username: String!) {
+          user(login: $username) {
+            contributionsCollection {
+              totalCommitContributions
+              restrictedContributionsCount
+              contributionCalendar {
+                totalContributions
+                weeks {
+                  contributionDays {
+                    date
+                    contributionCount
+                  }
+                }
+              }
+            }
+          }
+        }`,
+        variables: { username: GITHUB_USER },
+      }),
+      next: { revalidate: 300 },
+    });
+
+    if (graphqlRes.ok) {
+      const graphqlJson = (await graphqlRes.json()) as {
+        data: {
+          user: {
+            contributionsCollection: {
+              totalCommitContributions: number;
+              restrictedContributionsCount: number;
+              contributionCalendar: {
+                totalContributions: number;
+                weeks: {
+                  contributionDays: {
+                    date: string;
+                    contributionCount: number;
+                  }[];
+                }[];
+              };
+            };
+          };
+        };
+      };
+      const collection = graphqlJson.data?.user?.contributionsCollection;
+      if (collection) {
+        totalCommits =
+          collection.totalCommitContributions +
+          collection.restrictedContributionsCount;
+        // Last 90 days from contribution calendar
+        const days = collection.contributionCalendar.weeks.flatMap(
+          (w) => w.contributionDays,
+        );
+        const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
+        recentCommits = days
+          .filter((d) => new Date(d.date).getTime() >= cutoff)
+          .reduce((sum, d) => sum + d.contributionCount, 0);
+        // Current streak (consecutive days with contributions, ending today)
+        const sorted = [...days].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+        for (const d of sorted) {
+          if (d.contributionCount > 0) streak++;
+          else break;
+        }
+      }
+    }
+  } else {
+    // Fallback: approximate from public events
+    const eventsRes = await fetch(
+      `https://api.github.com/users/${GITHUB_USER}/events?per_page=100`,
+      { headers, next: { revalidate: 300 } },
+    );
+    if (eventsRes.ok) {
+      const events = (await eventsRes.json()) as {
+        type: string;
+        payload: { size?: number };
+      }[];
+      recentCommits = events
+        .filter((e) => e.type === "PushEvent")
+        .reduce((sum, e) => sum + (e.payload?.size ?? 0), 0);
+    }
   }
 
-  return [
+  const stats: Stat[] = [
     {
       source: "github",
       label: "Followers",
@@ -88,14 +167,43 @@ async function fetchGitHub(): Promise<Stat[]> {
       hint: "across public repos",
       url: `https://github.com/${GITHUB_USER}?tab=repositories`,
     },
-    {
+  ];
+
+  if (token) {
+    stats.push(
+      {
+        source: "github",
+        label: "All-Time Commits",
+        value: totalCommits,
+        hint: "via GitHub GraphQL",
+        url: `https://github.com/${GITHUB_USER}`,
+      },
+      {
+        source: "github",
+        label: "Recent Commits",
+        value: recentCommits,
+        hint: "last 90 days",
+        url: `https://github.com/${GITHUB_USER}`,
+      },
+      {
+        source: "github",
+        label: "Current Streak",
+        value: streak,
+        hint: streak === 1 ? "day" : "days",
+        url: `https://github.com/${GITHUB_USER}`,
+      },
+    );
+  } else {
+    stats.push({
       source: "github",
       label: "Recent Commits",
       value: recentCommits,
-      hint: "last 90 days",
+      hint: "last 90 days (public)",
       url: `https://github.com/${GITHUB_USER}`,
-    },
-  ];
+    });
+  }
+
+  return stats;
 }
 
 async function fetchLeetCode(): Promise<Stat[]> {
