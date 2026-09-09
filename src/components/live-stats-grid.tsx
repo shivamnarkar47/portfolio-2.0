@@ -20,7 +20,7 @@ type LanguageData = {
 };
 
 type Stat = {
-  source: "github" | "leetcode" | "codeforces";
+  source: "github" | "codeforces";
   label: string;
   value: string | number;
   hint?: string;
@@ -41,12 +41,6 @@ const SOURCE_META: Record<
 > = {
   github: {
     label: "GitHub",
-    color: "text-foreground",
-    ring: "ring-foreground/20",
-    glow: "shadow-foreground/5",
-  },
-  leetcode: {
-    label: "LeetCode",
     color: "text-foreground",
     ring: "ring-foreground/20",
     glow: "shadow-foreground/5",
@@ -129,7 +123,6 @@ export function LiveStatsGrid() {
 
   const groups: Record<Stat["source"], Stat[]> = {
     github: [],
-    leetcode: [],
     codeforces: [],
   };
   for (const s of data?.stats ?? []) groups[s.source].push(s);
