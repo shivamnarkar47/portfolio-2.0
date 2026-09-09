@@ -264,7 +264,7 @@ export default function Navbar() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-30">
-        <div className="max-w-2xl mx-auto px-3 pt-3">
+        <div className="w-full px-3 pt-3 sm:px-4 lg:px-6">
           <div
             className={cn(
               "flex items-center gap-1 rounded-2xl border bg-background/80 backdrop-blur-xl px-2 py-1.5 transition-shadow",
