@@ -302,77 +302,7 @@ async function fetchGitHub(): Promise<Stat[]> {
   return stats;
 }
 
-async function fetchLeetCode(): Promise<Stat[]> {
-  const res = await fetch("https://leetcode.com/graphql", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "Mozilla/5.0 (compatible; shvm-portfolio/1.0)",
-      Referer: "https://leetcode.com/",
-    },
-    body: JSON.stringify({
-      query: `query getUserProfile($username: String!) {
-        matchedUser(username: $username) {
-          username
-          profile { ranking reputation }
-          submitStats { acSubmissionNum { difficulty count } }
-          userContestRanking { attendedCount rating }
-        }
-      }`,
-      variables: { username: LEETCODE_USER },
-    }),
-    next: { revalidate: 600 },
-  });
-  if (!res.ok) throw new Error(`LeetCode ${res.status}`);
-  const json = (await res.json()) as {
-    data: {
-      matchedUser: {
-        profile: { ranking: number; reputation: number };
-        submitStats: {
-          acSubmissionNum: { difficulty: string; count: number }[];
-        };
-        userContestRanking: { attendedCount: number; rating: number } | null;
-      } | null;
-    };
-  };
-  const u = json.data.matchedUser;
-  if (!u) throw new Error("LeetCode user not found");
-  const byDiff = Object.fromEntries(
-    u.submitStats.acSubmissionNum.map((s) => [s.difficulty, s.count]),
-  );
-  const stats: Stat[] = [
-    {
-      source: "leetcode",
-      label: "Contest Ranking",
-      value: u.profile.ranking.toLocaleString(),
-      hint: "global",
-      url: `https://leetcode.com/u/${LEETCODE_USER}/`,
-    },
-    {
-      source: "leetcode",
-      label: "Solved Problems",
-      value: byDiff.All ?? 0,
-      hint: `Easy ${byDiff.Easy ?? 0} · Med ${byDiff.Medium ?? 0} · Hard ${byDiff.Hard ?? 0}`,
-      url: `https://leetcode.com/u/${LEETCODE_USER}/`,
-    },
-    {
-      source: "leetcode",
-      label: "Reputation",
-      value: u.profile.reputation,
-      url: `https://leetcode.com/u/${LEETCODE_USER}/`,
-    },
-  ];
-  if (u.userContestRanking) {
-    stats.push({
-      source: "leetcode",
-      label: "Contests",
-      value: u.userContestRanking.attendedCount,
-      hint: `rating ${u.userContestRanking.rating.toFixed(0)}`,
-      url: `https://leetcode.com/u/${LEETCODE_USER}/`,
-    });
-  }
-  return stats;
-}
+// LeetCode requires browser cookies - fetch client-side instead
 
 async function fetchCodeForces(): Promise<Stat[]> {
   const [infoRes, submissionsRes] = await Promise.all([
@@ -456,13 +386,12 @@ async function fetchCodeForces(): Promise<Stat[]> {
 export async function GET() {
   const results = await Promise.allSettled([
     fetchGitHub(),
-    fetchLeetCode(),
     fetchCodeForces(),
   ]);
 
   const stats: Stat[] = [];
   const errors: { source: StatSource; message: string }[] = [];
-  const sources: StatSource[] = ["github", "leetcode", "codeforces"];
+  const sources: StatSource[] = ["github", "codeforces"];
   let contributionGraph: { date: string; count: number }[] = [];
 
   results.forEach((r, i) => {
