@@ -20,7 +20,20 @@ interface ContributionWeek {
 }
 
 const DAYS = ["Mon", "", "Wed", "", "Fri", ""];
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 const getMonthLabels = (): { month: string; index: number }[] => {
   const labels: { month: string; index: number }[] = [];
@@ -53,11 +66,13 @@ const getLevel = (count: number): number => {
 
 const calculateStreak = (weeks: ContributionWeek[]): number => {
   const allDays: ContributionDay[] = [];
-  weeks.forEach(week => {
+  weeks.forEach((week) => {
     allDays.push(...week.contributionDays);
   });
 
-  const sortedDays = allDays.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedDays = allDays.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
 
   let streak = 0;
   for (const day of sortedDays) {
@@ -71,7 +86,11 @@ const calculateStreak = (weeks: ContributionWeek[]): number => {
   return streak;
 };
 
-export function GitHubGraph({ username = "shivamnarkar47", accessToken, className }: GitHubGraphProps) {
+export function GitHubGraph({
+  username = "shivamnarkar47",
+  accessToken,
+  className,
+}: GitHubGraphProps) {
   const [contributions, setContributions] = useState<ContributionWeek[]>([]);
   const [totalContributions, setTotalContributions] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -127,7 +146,8 @@ export function GitHubGraph({ username = "shivamnarkar47", accessToken, classNam
           throw new Error(data.errors[0].message);
         }
 
-        const calendar = data.data?.user?.contributionsCollection?.contributionCalendar;
+        const calendar =
+          data.data?.user?.contributionsCollection?.contributionCalendar;
 
         if (calendar?.weeks) {
           const weeks = calendar.weeks as ContributionWeek[];
@@ -179,24 +199,45 @@ export function GitHubGraph({ username = "shivamnarkar47", accessToken, classNam
 
   return (
     <div ref={containerRef} className={cn("w-full relative", className)}>
-      <svg width="100%" height={svgHeight} viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="xMidYMid meet">
+      <svg
+        width="100%"
+        height={svgHeight}
+        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+        preserveAspectRatio="xMidYMid meet"
+      >
         <g transform={`translate(${leftPadding}, ${topPadding})`}>
           <g>
             {DAYS.map((label, i) => (
-              <text key={i} x={-6} y={i * (cellSize + cellGap) + cellSize / 1.6} textAnchor="end" className="text-[8px] fill-muted-foreground" style={{ fontSize: "8px" }}>
+              <text
+                key={i}
+                x={-6}
+                y={i * (cellSize + cellGap) + cellSize / 1.6}
+                textAnchor="end"
+                className="text-[8px] fill-muted-foreground"
+                style={{ fontSize: "8px" }}
+              >
                 {label}
               </text>
             ))}
           </g>
 
           {monthLabels.map((label, i) => (
-            <text key={i} x={label.index * totalCellWidth} y={-6} className="text-[8px] fill-muted-foreground" style={{ fontSize: "8px" }}>
+            <text
+              key={i}
+              x={label.index * totalCellWidth}
+              y={-6}
+              className="text-[8px] fill-muted-foreground"
+              style={{ fontSize: "8px" }}
+            >
               {label.month}
             </text>
           ))}
 
           {contributions.map((week, weekIndex) => (
-            <g key={weekIndex} transform={`translate(${weekIndex * totalCellWidth}, 0)`}>
+            <g
+              key={weekIndex}
+              transform={`translate(${weekIndex * totalCellWidth}, 0)`}
+            >
               {week.contributionDays.map((day, dayIndex) => (
                 <rect
                   key={day.date}
@@ -205,7 +246,10 @@ export function GitHubGraph({ username = "shivamnarkar47", accessToken, classNam
                   width={cellSize}
                   height={cellSize}
                   rx={1}
-                  className={cn("transition-all duration-200", `level-${getLevel(day.contributionCount)}`)}
+                  className={cn(
+                    "transition-all duration-200",
+                    `level-${getLevel(day.contributionCount)}`,
+                  )}
                 >
                   <title>{`${day.date}: ${day.contributionCount} contributions`}</title>
                 </rect>
@@ -218,17 +262,34 @@ export function GitHubGraph({ username = "shivamnarkar47", accessToken, classNam
       <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
         <span>Less</span>
         <div className="flex gap-1">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "hsl(var(--muted-foreground) / 0.1)" }} />
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "hsl(var(--primary) / 0.3)" }} />
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "hsl(var(--primary) / 0.5)" }} />
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "hsl(var(--primary) / 0.7)" }} />
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "hsl(var(--primary))" }} />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: "hsl(var(--muted-foreground) / 0.1)" }}
+          />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: "hsl(var(--primary) / 0.3)" }}
+          />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: "hsl(var(--primary) / 0.5)" }}
+          />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: "hsl(var(--primary) / 0.7)" }}
+          />
+          <div
+            className="w-2.5 h-2.5 rounded-sm"
+            style={{ backgroundColor: "hsl(var(--primary))" }}
+          />
         </div>
         <span>More</span>
       </div>
 
       <div className="absolute -top-4 right-0 text-sm">
-        <span className="text-muted-foreground ">{totalContributions.toLocaleString()} contributions</span>
+        <span className="text-muted-foreground ">
+          {totalContributions.toLocaleString()} contributions
+        </span>
       </div>
 
       <div className="absolute bottom-0 right-0 text-xs text-muted-foreground">

@@ -30,9 +30,7 @@ export function HackathonCard({
         <time className="text-xs text-muted-foreground font-mono">{dates}</time>
       )}
       <h2 className="font-semibold leading-none text-sm">{title}</h2>
-      {location && (
-        <p className="text-xs text-muted-foreground">{location}</p>
-      )}
+      {location && <p className="text-xs text-muted-foreground">{location}</p>}
       {description && (
         <p className="text-sm text-muted-foreground leading-relaxed mt-2">
           {description}
@@ -51,10 +49,7 @@ export function HackathonCard({
         </div>
       )}
       {badge != "#" && (
-        <Badge
-          className="mt-3 text-xs w-fit"
-          variant="secondary"
-        >
+        <Badge className="mt-3 text-xs w-fit" variant="secondary">
           {badge}
         </Badge>
       )}

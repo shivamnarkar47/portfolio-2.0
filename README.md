@@ -41,17 +41,20 @@ Live at: [shivamnarkar16.vercel.app](https://shivamnarkar16.vercel.app)
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/shivamnarkar47/portfolio-2.0
    cd portfolio-2.0
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Start the development server**
+
    ```bash
    pnpm dev
    ```
@@ -76,6 +79,7 @@ src/data/resume.tsx
 ```
 
 This single file controls:
+
 - Personal information (name, initials, location, description)
 - Skills and technologies
 - Navbar links

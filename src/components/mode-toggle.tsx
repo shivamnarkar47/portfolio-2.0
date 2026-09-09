@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useTheme } from "next-themes";
 
-export function ModeToggle({ size = "icon" }: { size?: "icon" | "icon-sm" | "icon-xs" }) {
+export function ModeToggle({
+  size = "icon",
+}: {
+  size?: "icon" | "icon-sm" | "icon-xs";
+}) {
   const { theme, setTheme } = useTheme();
 
   return (

@@ -1,10 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Circle } from "lucide-react";
 import Link from "next/link";
@@ -60,7 +55,9 @@ export function ProjectCard({
                 </Badge>
               )}
             </div>
-            <time className="font-mono text-xs text-muted-foreground">{dates}</time>
+            <time className="font-mono text-xs text-muted-foreground">
+              {dates}
+            </time>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {description}
             </p>
@@ -70,11 +67,7 @@ export function ProjectCard({
           {tags && tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {tags?.map((tag) => (
-                <Badge
-                  className="text-xs"
-                  variant="secondary"
-                  key={tag}
-                >
+                <Badge className="text-xs" variant="secondary" key={tag}>
                   {tag}
                 </Badge>
               ))}
