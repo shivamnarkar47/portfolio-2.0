@@ -42,7 +42,7 @@ export default function StatsPage() {
       <section id="hackathons" className="w-full py-2">
         <BlurFade delay={BLUR_FADE_DELAY * 7}>
           <div className="flex items-center gap-3 mb-6">
-            <Trophy className="size-5 text-amber-500" />
+            <Trophy className="size-5" />
             <h2 className="text-xl font-bold">Hackathon Achievements</h2>
           </div>
         </BlurFade>

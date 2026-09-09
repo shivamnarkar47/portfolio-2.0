@@ -18,6 +18,7 @@ type StatsResponse = {
   fetchedAt: number;
   stats: Stat[];
   errors: { source: StatSource; message: string }[];
+  contributionGraph?: { date: string; count: number }[];
 };
 
 async function fetchGitHub(): Promise<Stat[]> {
@@ -50,27 +51,47 @@ async function fetchGitHub(): Promise<Stat[]> {
 
   let totalStars = 0;
   let totalForks = 0;
+  let totalWatchers = 0;
+  let totalOpenIssues = 0;
   const languageCounts: Record<string, number> = {};
+  const languageStars: Record<string, number> = {};
   if (reposRes.ok) {
     const repos = (await reposRes.json()) as {
       stargazers_count: number;
       forks_count: number;
+      watchers_count: number;
+      open_issues_count: number;
       language: string | null;
     }[];
     totalStars = repos.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
     totalForks = repos.reduce((sum, r) => sum + (r.forks_count ?? 0), 0);
+    totalWatchers = repos.reduce((sum, r) => sum + (r.watchers_count ?? 0), 0);
+    totalOpenIssues = repos.reduce(
+      (sum, r) => sum + (r.open_issues_count ?? 0),
+      0,
+    );
     for (const r of repos) {
       if (r.language) {
         languageCounts[r.language] = (languageCounts[r.language] ?? 0) + 1;
+        languageStars[r.language] =
+          (languageStars[r.language] ?? 0) + (r.stargazers_count ?? 0);
       }
     }
   }
 
+  const totalLangRepos = Object.values(languageCounts).reduce(
+    (a, b) => a + b,
+    0,
+  );
   const topLanguages = Object.entries(languageCounts)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([lang, count]) => `${lang} (${count})`)
-    .join(", ");
+    .slice(0, 5)
+    .map(([lang, count]) => ({
+      name: lang,
+      count,
+      percentage: Math.round((count / totalLangRepos) * 100),
+      stars: languageStars[lang] ?? 0,
+    }));
 
   const yearsOnGitHub = Math.floor(
     (Date.now() - new Date(user.created_at).getTime()) / (365.25 * 24 * 60 * 60 * 1000),
@@ -80,6 +101,7 @@ async function fetchGitHub(): Promise<Stat[]> {
   let totalCommits = 0;
   let recentCommits = 0;
   let streak = 0;
+  let contributionGraph: { date: string; count: number }[] = [];
 
   if (token) {
     const graphqlRes = await fetch("https://api.github.com/graphql", {
@@ -152,6 +174,11 @@ async function fetchGitHub(): Promise<Stat[]> {
           if (d.contributionCount > 0) streak++;
           else break;
         }
+        // Full contribution graph (last 365 days)
+        contributionGraph = days.map((d) => ({
+          date: d.date,
+          count: d.contributionCount,
+        }));
       }
     }
   } else {
@@ -210,13 +237,15 @@ async function fetchGitHub(): Promise<Stat[]> {
     },
   ];
 
-  if (topLanguages) {
+  if (topLanguages.length > 0) {
     stats.push({
       source: "github",
       label: "Top Languages",
-      value: topLanguages,
+      value: topLanguages.length,
+      hint: `${totalLangRepos} repos tracked`,
       url: `https://github.com/${GITHUB_USER}?tab=repositories`,
-    });
+      data: topLanguages,
+    } as any);
   }
 
   if (token) {
@@ -242,6 +271,14 @@ async function fetchGitHub(): Promise<Stat[]> {
         hint: streak === 1 ? "day" : "days",
         url: `https://github.com/${GITHUB_USER}`,
       },
+      {
+        source: "github",
+        label: "Contribution Graph",
+        value: contributionGraph.length,
+        hint: "last 365 days",
+        url: `https://github.com/${GITHUB_USER}`,
+        data: contributionGraph,
+      } as any,
     );
   } else {
     stats.push(
@@ -268,7 +305,11 @@ async function fetchGitHub(): Promise<Stat[]> {
 async function fetchLeetCode(): Promise<Stat[]> {
   const res = await fetch("https://leetcode.com/graphql", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": "Mozilla/5.0 (compatible; shvm-portfolio/1.0)",
+      Referer: "https://leetcode.com/",
+    },
     body: JSON.stringify({
       query: `query getUserProfile($username: String!) {
         matchedUser(username: $username) {
@@ -422,18 +463,29 @@ export async function GET() {
   const stats: Stat[] = [];
   const errors: { source: StatSource; message: string }[] = [];
   const sources: StatSource[] = ["github", "leetcode", "codeforces"];
+  let contributionGraph: { date: string; count: number }[] = [];
 
   results.forEach((r, i) => {
-    if (r.status === "fulfilled") stats.push(...r.value);
-    else
+    if (r.status === "fulfilled") {
+      const items = r.value;
+      // Extract contribution graph if present (from GitHub fetch)
+      const graphItem = items.find(
+        (s) => s.label === "Contribution Graph",
+      );
+      if (graphItem) {
+        contributionGraph = (graphItem as any).data || [];
+      }
+      stats.push(...items);
+    } else {
       errors.push({
         source: sources[i]!,
         message: r.reason?.message ?? "unknown error",
       });
+    }
   });
 
   return NextResponse.json<StatsResponse>(
-    { fetchedAt: Date.now(), stats, errors },
+    { fetchedAt: Date.now(), stats, errors, contributionGraph },
     {
       status: 200,
       headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=60" },

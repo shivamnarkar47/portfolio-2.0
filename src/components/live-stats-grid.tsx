@@ -6,12 +6,18 @@ import {
   AlertTriangle,
   ExternalLink,
   RefreshCw,
-  Trophy,
   Zap,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { ContributionGraph } from "@/components/contribution-graph";
+import { LanguagesBar } from "@/components/languages-bar";
+
+type LanguageData = {
+  name: string;
+  count: number;
+  percentage: number;
+  stars: number;
+};
 
 type Stat = {
   source: "github" | "leetcode" | "codeforces";
@@ -19,12 +25,14 @@ type Stat = {
   value: string | number;
   hint?: string;
   url?: string;
+  data?: any;
 };
 
 type StatsResponse = {
   fetchedAt: number;
   stats: Stat[];
   errors: { source: string; message: string }[];
+  contributionGraph?: { date: string; count: number }[];
 };
 
 const SOURCE_META: Record<
@@ -39,15 +47,15 @@ const SOURCE_META: Record<
   },
   leetcode: {
     label: "LeetCode",
-    color: "text-amber-500",
-    ring: "ring-amber-500/20",
-    glow: "shadow-amber-500/10",
+    color: "text-foreground",
+    ring: "ring-foreground/20",
+    glow: "shadow-foreground/5",
   },
   codeforces: {
     label: "CodeForces",
-    color: "text-blue-500",
-    ring: "ring-blue-500/20",
-    glow: "shadow-blue-500/10",
+    color: "text-foreground",
+    ring: "ring-foreground/20",
+    glow: "shadow-foreground/5",
   },
 };
 
@@ -64,9 +72,7 @@ function LiveDot({ stale }: { stale: boolean }) {
       <span
         className={cn(
           "absolute inline-flex h-full w-full rounded-full opacity-60",
-          stale
-            ? "bg-amber-500 animate-ping-slow"
-            : "bg-emerald-500 animate-ping",
+          stale ? "bg-amber-500 animate-ping-slow" : "bg-emerald-500 animate-ping",
         )}
       />
       <span
@@ -102,7 +108,8 @@ export function LiveStatsGrid() {
                 ...prev.errors,
                 {
                   source: "cache",
-                  message: err instanceof Error ? err.message : "fetch failed",
+                  message:
+                    err instanceof Error ? err.message : "fetch failed",
                 },
               ],
             }
@@ -127,6 +134,12 @@ export function LiveStatsGrid() {
   };
   for (const s of data?.stats ?? []) groups[s.source].push(s);
 
+  const contributionGraph = data?.contributionGraph ?? [];
+  const languages =
+    (data?.stats.find((s) => s.label === "Top Languages")?.data as
+      | LanguageData[]
+      | undefined) ?? [];
+
   const stale =
     lastUpdated !== null && Date.now() - lastUpdated > 6 * 60 * 1000;
 
@@ -135,7 +148,7 @@ export function LiveStatsGrid() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* status bar */}
       <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
         <div className="flex items-center gap-2">
@@ -188,6 +201,34 @@ export function LiveStatsGrid() {
         )}
       </AnimatePresence>
 
+      {/* contribution graph */}
+      {contributionGraph.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
+              GitHub
+            </h3>
+            <div className="flex-1 h-px bg-border" />
+            <Zap className="size-3 opacity-60 text-foreground" />
+          </div>
+          <ContributionGraph data={contributionGraph} />
+        </div>
+      )}
+
+      {/* languages */}
+      {languages.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-foreground">
+              GitHub
+            </h3>
+            <div className="flex-1 h-px bg-border" />
+            <Zap className="size-3 opacity-60 text-foreground" />
+          </div>
+          <LanguagesBar languages={languages} />
+        </div>
+      )}
+
       {/* cards */}
       {(Object.keys(groups) as Stat["source"][])
         .filter((k) => groups[k].length > 0)
@@ -207,7 +248,7 @@ export function LiveStatsGrid() {
                 <div className="flex-1 h-px bg-border" />
                 <Zap className={cn("size-3 opacity-60", meta.color)} />
               </div>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {groups[source].map((stat, id) => (
                   <motion.div
                     key={stat.label}
@@ -263,7 +304,7 @@ export function LiveStatsGrid() {
 
 function StatsSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
         <div className="flex items-center gap-2">
           <span className="relative flex size-2">
@@ -274,10 +315,28 @@ function StatsSkeleton() {
         </div>
         <RefreshCw className="size-3 animate-spin" />
       </div>
-      {[1, 2, 3].map((g) => (
+      {/* contribution graph skeleton */}
+      <div className="space-y-3">
+        <div className="h-3 w-16 rounded bg-muted-foreground/10 animate-pulse" />
+        <div className="h-24 w-full rounded-xl border bg-card p-4 animate-pulse" />
+      </div>
+      {/* languages skeleton */}
+      <div className="space-y-3">
+        <div className="h-3 w-16 rounded bg-muted-foreground/10 animate-pulse" />
+        <div className="h-3 w-full rounded bg-muted-foreground/10 animate-pulse" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-16 rounded-xl border bg-card p-3 animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+      {[1, 2].map((g) => (
         <div key={g} className="space-y-3">
           <div className="h-3 w-16 rounded bg-muted-foreground/10 animate-pulse" />
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
