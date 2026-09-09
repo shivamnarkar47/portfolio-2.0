@@ -21,7 +21,7 @@ type StatsResponse = {
 };
 
 async function fetchGitHub(): Promise<Stat[]> {
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.GITHUB_TOKEN ?? process.env.NEXT_GITHUB_TOKEN;
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
@@ -131,11 +131,26 @@ async function fetchGitHub(): Promise<Stat[]> {
       }
     }
   } else {
-    // Fallback: approximate from public events
-    const eventsRes = await fetch(
-      `https://api.github.com/users/${GITHUB_USER}/events?per_page=100`,
-      { headers, next: { revalidate: 300 } },
-    );
+    // Fallback without token: Search API for total commits + events for recent
+    const [searchRes, eventsRes] = await Promise.all([
+      fetch(`https://api.github.com/search/commits?q=author:${GITHUB_USER}`, {
+        headers: {
+          ...headers,
+          "User-Agent": "shvm-portfolio",
+        },
+        next: { revalidate: 600 },
+      }),
+      fetch(`https://api.github.com/users/${GITHUB_USER}/events?per_page=100`, {
+        headers,
+        next: { revalidate: 300 },
+      }),
+    ]);
+
+    if (searchRes.ok) {
+      const searchJson = (await searchRes.json()) as { total_count?: number };
+      totalCommits = searchJson.total_count ?? 0;
+    }
+
     if (eventsRes.ok) {
       const events = (await eventsRes.json()) as {
         type: string;
@@ -194,13 +209,22 @@ async function fetchGitHub(): Promise<Stat[]> {
       },
     );
   } else {
-    stats.push({
-      source: "github",
-      label: "Recent Commits",
-      value: recentCommits,
-      hint: "last 90 days (public)",
-      url: `https://github.com/${GITHUB_USER}`,
-    });
+    stats.push(
+      {
+        source: "github",
+        label: "All-Time Commits",
+        value: totalCommits,
+        hint: "via Search API",
+        url: `https://github.com/${GITHUB_USER}`,
+      },
+      {
+        source: "github",
+        label: "Recent Commits",
+        value: recentCommits,
+        hint: "last 90 days (public)",
+        url: `https://github.com/${GITHUB_USER}`,
+      },
+    );
   }
 
   return stats;
