@@ -1,0 +1,90 @@
+---
+title: "MiniURL: Why I Ported the Go Backend to Bun + Hono"
+publishedAt: "2026-09-13"
+summary: "Same API, fewer bugs: what the Go version got wrong and what the TypeScript rewrite fixed."
+---
+
+## The premise
+
+MiniURL started as a Go backend (`MiniURL/`: `net/http` + `ServeMux`) with a React frontend. It worked. Then I ported it to Bun + Hono (`MiniURL-server/`) with the same API contract: `POST /shorten`, `GET /recent`, `DELETE /url/:code`, `GET /:code`.
+
+Not for performance. For iteration speed: one runtime for frontend + backend, `bun test` without spinning up a server, and a Vercel deploy that is just a default-exported Hono app.
+
+## What was wrong with the Go version
+
+Small bugs, all real, all in `MiniURL/handlers/handler.go`:
+
+1. **Redirects were permanent.** `http.Redirect(..., StatusMovedPermanently)` — browsers cache a 301. Delete a code and the old target still resolves from cache. The port uses 302.
+2. **No server-set timestamp.** `models.URL.CreatedAt` existed but `ShortenURL` never set it — it echoed back whatever the client sent (usually zero). `GetRecent` then sorted by that zero time on every request.
+3. **`math/rand` codes, length-only validation.** `RandStringBytes` used `math/rand`, and `isValidShortCode` only checked `len 4-10`. No charset check, no URL check — any string passed as `original_url`.
+4. **Wrong status codes.** Duplicate short code → 500. Unknown code on redirect → 500. The port returns 409 and 404 with consistent `{ error }` JSON.
+5. **Missing return after 405.** `ShortenURL` called `http.Error(w, ..., 405)` on wrong method and kept going.
+
+Plus ops weight: a Nix → Alpine `Dockerfile`, three committed 8MB binaries sitting in git, and a `run.sh` that assumed Go.
+
+## What the port looks like
+
+One file per concern, no framework magic:
+
+- `create-app.ts` — routes, CORS (`hono/cors`), error shape
+- `lib/shortCode.ts` — `crypto.getRandomValues` over a 62-char set
+- `lib/validate.ts` — `isValidShortCode`, `isValidOriginalUrl`, `parseRecentLimit`
+- `storage/types.ts` + `storage/memory.ts` — `Storage` interface, `Map` impl
+
+The fixes, side by side:
+
+```go
+// Go: predictable codes, no retry
+b[i] = letterBytes[rand.Intn(len(letterBytes))]
+```
+
+```ts
+// TS: crypto-random, collision retry in create-app.ts
+crypto.getRandomValues(random)
+code += CHARSET[random[i] % CHARSET.length]
+```
+
+```go
+// Go: length-only check, no URL validation
+return len(code) >= 4 && len(code) <= 10
+```
+
+```ts
+// TS: charset + URL checks
+export const isValidShortCode = (code: string): boolean =>
+  /^[a-zA-Z0-9]{4,10}$/.test(code)
+export const isValidOriginalUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+```
+
+Storage got simpler too. Go converted the map to a slice and re-sorted by `CreatedAt` every `GET /recent`. The TS `Map` preserves insertion order (= creation order), so recent is a slice + reverse — no sort.
+
+```ts
+const urls = [...this.urls.values()]
+if (limit > 0 && limit < urls.length) {
+  return urls.slice(urls.length - limit).reverse()
+}
+return urls.reverse()
+```
+
+Custom-code collision returns 409 immediately; generated-code collision retries up to 5 times with a fresh code. That distinction didn't exist in Go.
+
+## What didn't change (on purpose)
+
+Still in-memory behind a `Storage` interface — swap in a DB later without touching routes. Still `GET /recent?limit=` defaulting to 10, clamped to 100. The API contract is identical, which is why the port was verifiable side-by-side.
+
+## The deploy win
+
+Go deployed via Docker. The TS backend deploys as a Vercel serverless function: `src/server.ts` default-exports the Hono app (zero-config Hono preset), `src/dev.ts` is local-only (`bun --hot`). The old `api/` dir and `vercel.json` got deleted once the preset took over. Added `/_health`, a `Makefile` (`dev`, `test`, `typecheck`, `build`), and 26 `bun test` cases that hit `app.request()` directly — no listening socket needed.
+
+Commit `ffb5399` also deleted the committed Go binaries. Best diff in the whole migration.
+
+## The takeaway
+
+Go wasn't too slow — it was too lonely. Separate toolchain, separate types from the frontend, heavier deploy for a side project. The rewrite is ~200 lines of TS, typechecked, tested, and deployable with a git push. When this needs Postgres, only `storage/` changes. Until then, in-memory is the feature.

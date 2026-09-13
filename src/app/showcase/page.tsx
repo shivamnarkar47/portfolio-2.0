@@ -11,7 +11,7 @@ const BLUR_FADE_DELAY = 0.04;
 export default function ShowcasePage() {
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-16 px-4">
-      <section id="hero">
+      <section id="hero" className="pt-16 sm:pt-0">
         <div className="w-full max-w-2xl space-y-6">
           <BlurFade delay={BLUR_FADE_DELAY}>
             <h1 className="font-medium text-3xl tracking-tighter">
