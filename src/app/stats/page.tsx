@@ -27,7 +27,7 @@ export default function StatsPage() {
           <BlurFade delay={BLUR_FADE_DELAY * 1.5}>
             <p className="text-base text-muted-foreground leading-relaxed max-w-2xl">
               A live view of my developer profiles — auto-refreshing stats from
-              GitHub, LeetCode, and CodeForces. Numbers update themselves.
+              GitHub and CodeForces. Numbers update themselves.
             </p>
           </BlurFade>
         </div>

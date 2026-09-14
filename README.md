@@ -12,7 +12,7 @@ Live at: [shivamnarkar16.vercel.app](https://shivamnarkar16.vercel.app)
 
 - **⚡ Single-File Config** - Configure your entire portfolio by editing `src/data/resume.tsx`
 - **📝 MDX Blog** - Write posts as `.mdx` files in `content/`, rendered with Shiki-powered syntax highlighting
-- **📊 Stats Page** - GitHub stars, CodeWars and LeetCode badges, and hackathon highlights
+- **📊 Stats Page** - Live GitHub + Codeforces stats (auto-refreshing), contribution graph, language breakdown, and hackathon highlights
 - **🖼️ Project Showcase** - A dedicated page featuring your best projects
 - **🌙 Dark Mode** - Built-in theme switching with smooth transitions
 - **📱 Responsive** - Optimized for all devices and screen sizes
@@ -28,15 +28,14 @@ Live at: [shivamnarkar16.vercel.app](https://shivamnarkar16.vercel.app)
 - **Animations:** Framer Motion
 - **Markdown:** unified, remark, rehype, rehype-pretty-code (Shiki), gray-matter
 - **Icons:** Lucide React, Radix UI Icons
-- **Package Manager:** pnpm
+- **Package Manager:** Bun 1.4.0
 - **Deployment:** Vercel
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- pnpm (recommended) or npm/yarn
+- Bun 1.4.0+
 
 ### Installation
 
@@ -50,13 +49,13 @@ Live at: [shivamnarkar16.vercel.app](https://shivamnarkar16.vercel.app)
 2. **Install dependencies**
 
    ```bash
-   pnpm install
+   bun install
    ```
 
 3. **Start the development server**
 
    ```bash
-   pnpm dev
+   bun dev
    ```
 
 4. **Open your browser**
@@ -64,11 +63,13 @@ Live at: [shivamnarkar16.vercel.app](https://shivamnarkar16.vercel.app)
 
 ### Environment Variables
 
-Create a `.env` file (optional). The GitHub contributions graph on the home page uses a GitHub personal access token:
+Create a `.env` file (optional). The GitHub contributions graph on the home page and the live stats API use a GitHub personal access token:
 
 ```bash
-NEXT_GITHUB_TOKEN=your_github_token
+GITHUB_TOKEN=your_github_token
 ```
+
+`NEXT_GITHUB_TOKEN` is also accepted as a fallback. Without a token, the stats API falls back to unauthenticated endpoints with reduced data (no contribution calendar).
 
 ## ⚙️ Configuration
 
@@ -97,18 +98,22 @@ portfolio-2.0/
 ├── src/
 │   ├── app/               # Next.js App Router pages
 │   │   ├── page.tsx       # Landing page (/)
+│   │   ├── api/stats/     # Live stats API (GitHub + Codeforces, cached 5m)
 │   │   ├── blog/          # Blog index and /blog/[slug]
 │   │   ├── stats/         # Stats page
 │   │   └── showcase/      # Project showcase page
 │   ├── components/        # React components
 │   │   ├── ui/            # shadcn/ui components
 │   │   ├── magicui/       # Magic UI components
+│   │   ├── live-stats-grid.tsx      # Auto-refreshing stats cards
+│   │   ├── contribution-graph.tsx   # GitHub contribution calendar
+│   │   ├── languages-bar.tsx        # Top-languages breakdown
 │   │   └── ...            # Feature components
 │   ├── data/              # Configuration and data
 │   │   ├── resume.tsx     # Single source of truth for content
 │   │   └── blog.ts        # MDX → HTML pipeline (unified/remark/rehype)
 │   └── lib/               # Utility functions
-├── .husky/                # Git hooks (lint-staged, type-check, build)
+├── .github/workflows/     # CI (lint, type-check, build, prettier check)
 └── package.json
 ```
 
@@ -132,13 +137,14 @@ Posts support GitHub-flavored Markdown (tables, task lists) and code blocks with
 ## 📜 Available Scripts
 
 ```bash
-pnpm dev       # Start the development server
-pnpm build     # Build for production
-pnpm start     # Start the production server
-pnpm lint      # Run ESLint
+bun dev       # Start the development server
+bun build     # Build for production
+bun start     # Start the production server
+bun lint      # Run ESLint
+bun format    # Format everything with Prettier
 ```
 
-A pre-commit hook (Husky) runs `lint-staged`, `tsc --noEmit`, and `pnpm build` on every commit.
+CI (`.github/workflows/ci.yml`) runs `bun run lint`, `bunx tsc --noEmit`, `bun run build`, and `bunx prettier --check .` on pushes and PRs to `main`.
 
 ## 🚀 Deployment
 
@@ -154,10 +160,10 @@ A pre-commit hook (Husky) runs `lint-staged`, `tsc --noEmit`, and `pnpm build` o
 
 ```bash
 # Build for production
-pnpm build
+bun build
 
 # Start production server
-pnpm start
+bun start
 ```
 
 ## 🤝 Contributing
