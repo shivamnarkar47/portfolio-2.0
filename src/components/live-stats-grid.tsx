@@ -2,12 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  AlertTriangle,
-  ExternalLink,
-  RefreshCw,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, ExternalLink, RefreshCw, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ContributionGraph } from "@/components/contribution-graph";
 import { LanguagesBar } from "@/components/languages-bar";
@@ -66,7 +61,9 @@ function LiveDot({ stale }: { stale: boolean }) {
       <span
         className={cn(
           "absolute inline-flex h-full w-full rounded-full opacity-60",
-          stale ? "bg-amber-500 animate-ping-slow" : "bg-emerald-500 animate-ping",
+          stale
+            ? "bg-amber-500 animate-ping-slow"
+            : "bg-emerald-500 animate-ping",
         )}
       />
       <span
@@ -102,8 +99,7 @@ export function LiveStatsGrid() {
                 ...prev.errors,
                 {
                   source: "cache",
-                  message:
-                    err instanceof Error ? err.message : "fetch failed",
+                  message: err instanceof Error ? err.message : "fetch failed",
                 },
               ],
             }
@@ -130,8 +126,7 @@ export function LiveStatsGrid() {
   const contributionGraph = data?.contributionGraph ?? [];
   const languages =
     (data?.stats.find((s) => s.label === "Top Languages")?.data as
-      | LanguageData[]
-      | undefined) ?? [];
+      LanguageData[] | undefined) ?? [];
 
   const stale =
     lastUpdated !== null && Date.now() - lastUpdated > 6 * 60 * 1000;

@@ -1,0 +1,45 @@
+---
+title: "This Week: Reviewing PR #11, Starting TikzForge, Hotspot Snapshot Verified"
+publishedAt: "2026-09-14"
+summary: "A contributor fix for the NM unmanaged-devices conflict, early work on a Tauri-based TikZ editor, and a verified marketplace snapshot for omarchy-hotspot."
+---
+
+Three things moved this week. One review, one new build, one verification.
+
+## Reviewing PR #11 on omarchy-hotspot
+
+[codydon](https://github.com/codydon) opened [PR #11](https://github.com/shivamnarkar47/omarchy-hotspot/pull/11): `fix: merge NM unmanaged-devices so ap0 stays unmanaged`, fixing [#10](https://github.com/shivamnarkar47/omarchy-hotspot/issues/10).
+
+The root cause is real and well-evidenced: NetworkManager does not merge `unmanaged-devices` across `conf.d` files — last file wins. Our `99-unmanaged-ap0.conf` loses to files like `lerd-dns-link.conf`, NM re-manages `ap0` as `type managed`, and `ip link set ap0 up` fails with `RTNETLINK answers: Device or resource busy`. The PR's direction is right: collect existing entries, dedupe, ensure `interface-name:ap0`, write to a `zz-` file that sorts last, remove the legacy `99-` file, and verify via `NetworkManager --print-config`.
+
+I left review blockers before merge:
+
+1. **Don't unconditionally delete `ap0` at install time.** It kills an active hotspot on reinstall. Guard it — only delete when `ap0` is `type managed`, or skip when the hotspot service is active.
+2. **Uninstall must not drop co-tenant entries.** Removing the merged file deletes the other plugin's exemption too. Strip only `ap0` and keep the rest.
+3. **The helper needs a runtime guard, not just install-time.** `ensure_vif()` early-returns if `ap0` exists, so a future conflicting conf re-breaks until reinstall. If `ap0` exists but is `type managed`, delete and recreate.
+
+Plus parser nits: exact-match dedupe instead of glob-expanding patterns, split on whitespace as well as `,;`, scope to `[keyfile]` and strip `#` comments. And live verification is still open: install, `print-config` showing both `ap0` + `lerd0`, unmanaged `__ap` vif, working toggle, `shellcheck`/`bash -n` clean.
+
+Good contribution, solid diagnosis. Just needs the coexistence story to hold in both directions.
+
+## Trying to build TikzForge
+
+New repo: [tikzforge](https://github.com/shivamnarkar47/tikzforge) — a native desktop app for editing TikZ/LaTeX diagrams with live PDF preview.
+
+The stack is Tauri v2 (Rust) + React 19 + TypeScript + Vite, CodeMirror 6 with custom LaTeX highlighting, Zustand stores, Tailwind v4 + shadcn/ui, Vitest + Testing Library. The pitch is simple: edit TikZ, see the PDF update instantly, with clickable errors, auto-compile debounce, multi-document tabs, SyncTeX forward sync (`Ctrl+Click` PDF → source line), engine detection, and auto-updates.
+
+Still early — 29 commits on `master`, scaffolding plus editor/preview/error-list flows going in. The interesting work ahead is the compile loop (pdflatex process management via `invoke`, log parsing to line numbers) and keeping preview latency low without recompiling on every keystroke.
+
+## omarchy-hotspot snapshot verified on the marketplace
+
+The [marketplace listing](https://omarchyplugins.com/plugin.html?id=io.github.shivamnarkar47.omarchy-hotspot) (`io.github.shivamnarkar47.omarchy-hotspot`) just got its snapshot update verified. That matters because installs pin trust to a reviewed commit — users pulling the plugin get the hardened helper, inline SSID/password editing, and failure surfacing from the last round, not some drifted HEAD.
+
+Good progress after the security-review batch. Next hotspot work is feature work (client list, per-client stats), not cleanup.
+
+## What's next
+
+Land PR #11 once the guards are in, keep pushing TikzForge toward a usable compile-preview loop, and leave the hotspot alone unless the marketplace flags something.
+
+---
+
+_Shivam Narkar. Building seams between systems that don't natively talk._

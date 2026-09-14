@@ -158,6 +158,36 @@ export const DATA = {
   ],
   projects: [
     {
+      title: "MiniURL",
+      href: "https://github.com/shivamnarkar47/MiniURL-shortener",
+      dates: "September 2026",
+      active: false,
+      description:
+        "A URL shortener with a React + Vite frontend and a Bun + Hono backend. Ported from the original Go (net/http) backend to TypeScript with the same API contract — fixed cached 301 redirects, missing server timestamps, math/rand codes, and wrong status codes. Ships crypto-random codes, strict validation, in-memory storage behind a swappable interface, 26 bun tests, and a Vercel serverless deploy.",
+      technologies: [
+        "Bun",
+        "Hono",
+        "TypeScript",
+        "React",
+        "Vite",
+        "Tailwind CSS",
+        "Go",
+        "Vercel",
+      ],
+      links: [
+        {
+          type: "Source",
+          href: "https://github.com/shivamnarkar47/MiniURL-shortener",
+          icon: <Icons.github className="size-3" />,
+        },
+        {
+          type: "Website",
+          href: "https://mini-url-shortener-ngee.vercel.app",
+          icon: <Icons.globe className="size-3" />,
+        },
+      ],
+    },
+    {
       title: "commandcode-proxy",
       href: "https://github.com/shivamnarkar47/commandcode-proxy",
       dates: "September 2026 - Present",

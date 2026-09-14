@@ -93,7 +93,8 @@ async function fetchGitHub(): Promise<Stat[]> {
     }));
 
   const yearsOnGitHub = Math.floor(
-    (Date.now() - new Date(user.created_at).getTime()) / (365.25 * 24 * 60 * 60 * 1000),
+    (Date.now() - new Date(user.created_at).getTime()) /
+      (365.25 * 24 * 60 * 60 * 1000),
   );
 
   // Fetch real commit data via GraphQL (requires token for full history)
@@ -303,10 +304,9 @@ async function fetchGitHub(): Promise<Stat[]> {
 
 async function fetchCodeForces(): Promise<Stat[]> {
   const [infoRes, submissionsRes] = await Promise.all([
-    fetch(
-      `https://codeforces.com/api/user.info?handles=${CODEFORCES_USER}`,
-      { next: { revalidate: 600 } },
-    ),
+    fetch(`https://codeforces.com/api/user.info?handles=${CODEFORCES_USER}`, {
+      next: { revalidate: 600 },
+    }),
     fetch(
       `https://codeforces.com/api/user.status?handle=${CODEFORCES_USER}&from=1&count=1000`,
       { next: { revalidate: 600 } },
@@ -333,7 +333,10 @@ async function fetchCodeForces(): Promise<Stat[]> {
   let solvedProblems = 0;
   if (submissionsRes.ok) {
     const subJson = (await submissionsRes.json()) as {
-      result: { verdict: string; problem: { contestId?: number; index: string } }[];
+      result: {
+        verdict: string;
+        problem: { contestId?: number; index: string };
+      }[];
     };
     const solvedSet = new Set<string>();
     for (const s of subJson.result ?? []) {
@@ -381,10 +384,7 @@ async function fetchCodeForces(): Promise<Stat[]> {
 }
 
 export async function GET() {
-  const results = await Promise.allSettled([
-    fetchGitHub(),
-    fetchCodeForces(),
-  ]);
+  const results = await Promise.allSettled([fetchGitHub(), fetchCodeForces()]);
 
   const stats: Stat[] = [];
   const errors: { source: StatSource; message: string }[] = [];
@@ -395,9 +395,7 @@ export async function GET() {
     if (r.status === "fulfilled") {
       const items = r.value;
       // Extract contribution graph if present (from GitHub fetch)
-      const graphItem = items.find(
-        (s) => s.label === "Contribution Graph",
-      );
+      const graphItem = items.find((s) => s.label === "Contribution Graph");
       if (graphItem) {
         contributionGraph = (graphItem as any).data || [];
       }

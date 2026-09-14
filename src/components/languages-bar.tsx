@@ -38,11 +38,7 @@ function langColor(name: string): string {
   return LANG_COLORS[name] ?? "bg-muted-foreground";
 }
 
-export function LanguagesBar({
-  languages,
-}: {
-  languages: LanguageData[];
-}) {
+export function LanguagesBar({ languages }: { languages: LanguageData[] }) {
   if (!languages || languages.length === 0) return null;
 
   return (
@@ -82,7 +78,9 @@ export function LanguagesBar({
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
         {languages.map((lang) => (
           <div key={lang.name} className="flex items-center gap-2 text-sm">
-            <span className={`size-2.5 shrink-0 rounded-sm ${langColor(lang.name)}`} />
+            <span
+              className={`size-2.5 shrink-0 rounded-sm ${langColor(lang.name)}`}
+            />
             <span className="font-medium truncate">{lang.name}</span>
             <span className="ml-auto font-mono text-xs text-muted-foreground">
               {lang.percentage}%
@@ -101,11 +99,14 @@ export function LanguagesBar({
             transition={{ delay: i * 0.05 }}
             className="flex items-center gap-3 rounded-xl border bg-card p-3"
           >
-            <span className={`size-4 shrink-0 rounded ${langColor(lang.name)}`} />
+            <span
+              className={`size-4 shrink-0 rounded ${langColor(lang.name)}`}
+            />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{lang.name}</p>
               <p className="text-xs text-muted-foreground">
-                {lang.count} {lang.count === 1 ? "repo" : "repos"} · {lang.stars} stars
+                {lang.count} {lang.count === 1 ? "repo" : "repos"} ·{" "}
+                {lang.stars} stars
               </p>
             </div>
             <p className="font-mono text-lg font-bold">{lang.percentage}%</p>

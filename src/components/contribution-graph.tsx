@@ -59,12 +59,15 @@ export function ContributionGraph({
     );
     const firstDate = sorted[0] ? new Date(sorted[0].date) : new Date();
     const dayOfWeek = firstDate.getDay();
-    const padding: ContributionDay[] = Array.from({ length: dayOfWeek }, (_, i) => ({
-      date: new Date(
-        firstDate.getTime() - (dayOfWeek - i) * 86400000,
-      ).toISOString(),
-      count: 0,
-    }));
+    const padding: ContributionDay[] = Array.from(
+      { length: dayOfWeek },
+      (_, i) => ({
+        date: new Date(
+          firstDate.getTime() - (dayOfWeek - i) * 86400000,
+        ).toISOString(),
+        count: 0,
+      }),
+    );
     const padded = [...padding, ...sorted];
 
     // Group into weeks (columns of 7)
@@ -77,7 +80,12 @@ export function ContributionGraph({
     const max = Math.max(...sorted.map((d) => d.count), 1);
     const labels = getMonthLabels(padded);
 
-    return { weeks: w, monthLabels: labels, totalContributions: total, maxCount: max };
+    return {
+      weeks: w,
+      monthLabels: labels,
+      totalContributions: total,
+      maxCount: max,
+    };
   }, [data]);
 
   if (data.length === 0) return null;
