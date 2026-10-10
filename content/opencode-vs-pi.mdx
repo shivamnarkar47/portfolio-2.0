@@ -6,6 +6,23 @@ summary: "Same prompt, same model, same directory — Opencode finished in 1m12s
 
 **TL;DR:** Asked *"Where is more storage being used? Give me a report here."* in `C:\Users\ShivamNarkar` with `muse-spark-1.3-contributor` via `opencode-go` on both harnesses. Opencode finished in ~1m12s with ~18k fresh tokens; Pi took ~2m1s and ~292k cache-inclusive tokens. Same answer, same disk (C: 860.7GB used / 92GB free). The gap is harness behavior, not model smarts — and cost barely moved because the extra tokens were cheap cache reads.
 
+## The two paths
+
+```mermaid
+flowchart TB
+    Q["Same prompt<br/>Where is storage used?<br/>muse-spark-1.3 / opencode-go"] --> O & P
+    subgraph O ["Opencode - 1m12s / 153k incl. cache"]
+        O1["Get-PSDrive + top dirs<br/>backgrounded"] --> O2["Result: AppData 503G / OneDrive 243G"]
+        O2 --> O3["2 parallel jobs:<br/>AppData + OneDrive/Docs/Downloads"]
+        O3 --> O4["Report as results land"]
+    end
+    subgraph P ["Pi - 2m01s / 292k incl. cache"]
+        P1["Recurse C: + profile<br/>120s TIMEOUT, no output"] --> P2["Retry Recurse C:<br/>108s, 376G Users"]
+        P2 --> P3["Recurse ProgramData, Bin, AppData, VHDx...<br/>cache 30k to 236k"]
+        P3 --> P4["robocopy /L fallback<br/>too late, context polluted"]
+    end
+```
+
 ## Setup (apples to apples)
 
 - Prompt (identical): `Where is more storage is being used ? Give me a report here.`

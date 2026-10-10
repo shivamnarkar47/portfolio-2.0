@@ -1,6 +1,7 @@
 import { getBlogPosts, getPost } from "@/data/blog";
 import { DATA } from "@/data/resume";
 import { formatDate } from "@/lib/utils";
+import { Mermaid } from "@/components/mermaidcn/mermaid";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -98,10 +99,19 @@ export default async function Blog({
           </p>
         </Suspense>
       </div>
-      <article
-        className="prose dark:prose-invert"
-        dangerouslySetInnerHTML={{ __html: post.source }}
-      ></article>
+      <article className="prose dark:prose-invert">
+        {post.source.split(/<div data-mermaid="(\d+)"><\/div>/).map((part, i) =>
+          i % 2 === 0 ? (
+            <div
+              key={i}
+              className="contents"
+              dangerouslySetInnerHTML={{ __html: part }}
+            />
+          ) : (
+            <Mermaid key={i} chart={post.mermaids[Number(part)]} />
+          ),
+        )}
+      </article>
     </section>
   );
 }

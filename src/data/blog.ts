@@ -42,11 +42,18 @@ export async function getPost(slug: string) {
   const filePath = path.join("content", `${slug}.mdx`);
   let source = fs.readFileSync(filePath, "utf-8");
   const { content: rawContent, data: metadata } = matter(source);
-  const content = await markdownToHTML(rawContent);
+  // ponytail: mermaid fences render client-side via <Mermaid/>, upgrade to full MDX when posts need more components
+  const mermaids: string[] = [];
+  const fenced = rawContent.replace(
+    /```mermaid\n([\s\S]*?)```/g,
+    (_, chart) => `\n<div data-mermaid="${mermaids.push(chart.trim()) - 1}"></div>\n`,
+  );
+  const content = await markdownToHTML(fenced);
   return {
     source: content,
     metadata,
     slug,
+    mermaids,
   };
 }
 
