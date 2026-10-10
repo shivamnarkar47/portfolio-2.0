@@ -100,7 +100,7 @@ export default async function Blog({
         </Suspense>
       </div>
       <article className="prose dark:prose-invert">
-        {post.source.split(/<div data-mermaid="(\d+)"><\/div>/).map((part, i) =>
+        {post.source.split(/<p>:::mermaid-chart-(\d+):::<\/p>/).map((part, i) =>
           i % 2 === 0 ? (
             <div
               key={i}
@@ -108,7 +108,7 @@ export default async function Blog({
               dangerouslySetInnerHTML={{ __html: part }}
             />
           ) : (
-            <Mermaid key={i} chart={post.mermaids[Number(part)]} />
+            <Mermaid key={i} chart={post.mermaids[Number(part)]} debounceTime={0} />
           ),
         )}
       </article>

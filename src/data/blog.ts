@@ -43,10 +43,11 @@ export async function getPost(slug: string) {
   let source = fs.readFileSync(filePath, "utf-8");
   const { content: rawContent, data: metadata } = matter(source);
   // ponytail: mermaid fences render client-side via <Mermaid/>, upgrade to full MDX when posts need more components
+  // NOTE: placeholder must be plain text — remark-rehype strips raw HTML by default
   const mermaids: string[] = [];
   const fenced = rawContent.replace(
-    /```mermaid\n([\s\S]*?)```/g,
-    (_, chart) => `\n<div data-mermaid="${mermaids.push(chart.trim()) - 1}"></div>\n`,
+    /```mermaid\r?\n([\s\S]*?)```/g,
+    (_, chart) => `\n\n:::mermaid-chart-${mermaids.push(chart.trim()) - 1}:::\n\n`,
   );
   const content = await markdownToHTML(fenced);
   return {
