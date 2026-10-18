@@ -8,7 +8,7 @@ export function ParticleDemo() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [count, setCount] = useState(20000);
   const [speed, setSpeed] = useState(1);
-  const [size, setSize] = useState(2);
+  const [size, setSize] = useState(6);
   const [running, setRunning] = useState(true);
   const [fps, setFps] = useState(0);
   const [supported, setSupported] = useState<boolean | null>(null);
@@ -110,7 +110,7 @@ fn vs(@builtin(vertex_index) vi: u32, @builtin(instance_index) ii: u32) -> @buil
   let p = particles[ii];
   var corners = array<vec2<f32>,4>(vec2(-1.0,-1.0), vec2(1.0,-1.0), vec2(-1.0,1.0), vec2(1.0,1.0));
   let c = corners[vi % 4u];
-  let px = c * params.size / 400.0;
+  let px = c * params.size / 120.0;
   return vec4(p.pos + px, 0.0, 1.0);
 }
 
