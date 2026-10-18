@@ -1,0 +1,166 @@
+---
+title: "ArthaSnap: Judging NSE/BSE Stocks with SubQ in One Call"
+publishedAt: "2026-10-18"
+summary: "How I built a stock verdict app on Cloudflare Workers: Yahoo snapshots + SubQ packed scoring (3 questions × 5 symbols = 1 call) + one Groq brief. Movers board over a 2898-symbol universe, per-stock charts, no worker-to-worker hops."
+---
+
+# ArthaSnap
+
+Type up to 5 NSE/BSE symbols. SubQ's decision model calls **buy / watch / avoid**
+with conviction — Groq briefs the latest news. No noise, just the verdict.
+
+Live: https://subq-web.shivamnarkar47.workers.dev
+
+## The premise
+
+I wanted a stock app that doesn't shout. Five symbols at most, one verdict each
+(buy / watch / avoid), a conviction score, and a short Groq brief of the news.
+No dashboards with 40 indicators, no chatbot. Just the call.
+
+The interesting part isn't the UI. It's that the whole decision for up to 5
+symbols happens in **one SubQ call** and **one Groq call** — not 5+5.
+
+## Architecture (fewest moving pieces)
+
+| Dir | What | Run | Deployed |
+|---|---|---|---|
+| `indian-api/` | NSE/BSE snapshot REST (Cloudflare Worker, Yahoo-backed, vendored from [0xramm/Indian-Stock-Market-API](https://github.com/0xramm/Indian-Stock-Market-API)) | `npx wrangler dev --port 8787` | `stock-api…workers.dev` |
+| `digest/` | Bun + Hono JSON API: `/stock /history /decide /news /digest /movers /suggest` | `bun src/index.ts` (:3000) | `subq-digest…workers.dev` |
+| `web/` | TanStack Start + shadcn + ns-ui, SSR + streaming, nitro → Workers | `bun run dev` (:3001) | `subq-web…workers.dev` |
+
+`digest` and `web` call Yahoo / SubQ / Groq directly. `web` imports `digest/src/svc.ts`
+in-process on the server. `indian-api` stays a public API nobody depends on.
+
+## The packed scoring trick
+
+SubQ charges input tokens only and answers a batch of questions in one call.
+So instead of 5 separate calls, I pack 3 questions per symbol into one request:
+
+```ts
+// digest/src/svc.ts
+export function buildQuestions(syms: string[]) {
+  const questions: Record<string, any> = {};
+  for (const s of syms) {
+    const k = qkey(s);
+    questions[`buy_${k}`] = { type: "noul", instructions: `${s}: buy for 1-4 week hold?`, criteria: { true: "...", false: "..." } };
+    questions[`action_${k}`] = { type: "choice", instructions: `${s}: pick one`, criteria: { buy: "...", watch: "...", avoid: "..." } };
+    questions[`conviction_${k}`] = { type: "score", instructions: `${s}: conviction from avoid to strong buy`, criteria: ["avoid", "weak", "watch", "buy", "strong buy"] };
+  }
+  return questions;
+}
+```
+
+`criteria` for `score` must be an **array** of consecutive levels, not an object —
+that one took a while to find. 3 questions × 5 symbols = 15 questions, 1 call.
+
+The per-symbol state is just a JSON blob of snapshot + SMA20/RSI14 + headlines:
+
+```ts
+const states: Record<string, string> = {};
+for (const p of per) states[p.sym] = JSON.stringify({ snap: p.snap, feats: { sma20: p.feats.sma20, rsi14: p.feats.rsi14 }, news: p.news.map((h) => h.title) });
+```
+
+Then `decide()` posts `{ model: "subq-snap-preview", state, questions }` once.
+
+## One digest, two outbound calls
+
+```ts
+export async function digest(syms: string[], range = "1mo", interval = "1d") {
+  const per = await Promise.all(syms.map(async (sym) => {
+    const [snap, ch, news] = await Promise.all([snapshot(sym), chart(sym, range, interval), headlines(sym, syms.length > 1 ? 3 : 5)]);
+    const closes = ch.candles.map((c) => c.c);
+    const feats = { sma20: sma(closes, 20), rsi14: rsi(closes), spark: closes.slice(-20) };
+    return { sym, snap, feats, news, candles: syms.length > 1 ? [] : ch.candles };
+  }));
+  const states = /* ... */;
+  const [answers, summary] = await Promise.all([
+    decide(states),                                    // 1 SubQ call
+    summarize(per.map((p) => /* ... */).join("\\n")), // 1 Groq call
+  ]);
+  return { results: /* ... */, summary };
+}
+```
+
+Per-symbol fetches run in parallel; the two model calls run in parallel. So a
+5-symbol digest is ~1 round trip of parallelism, not 10 sequential hops.
+
+## Movers board
+
+`/movers` ranks top-10 gainers/losers over a ~2898-symbol NSE universe in one
+Yahoo batch call, cached 5 minutes:
+
+```ts
+export async function movers() {
+  const hit = cc.get("movers");
+  if (hit) return hit;
+  const q = await yahooBatch(UNIVERSE);
+  const rows = UNIVERSE.filter((t) => q[t]?.chgPct != null)
+    .map((t) => ({ symbol: t, price: q[t].price, chgPct: +(+q[t].chgPct).toFixed(2) }))
+    .sort((a, b) => b.chgPct - a.chgPct);
+  const out = { gainers: rows.slice(0, 10), losers: rows.slice(-10).reverse() };
+  cc.set("movers", out, 300);
+  return out;
+}
+```
+
+`ponytail:` the universe is a hardcoded Nifty-heavy list (bundled JSON from NSE
+constituents). Live list when asked.
+
+## Yahoo without worker-to-worker hops
+
+Cloudflare Workers can't fetch other `workers.dev` hosts (edge 1042). So
+`digest` and `web` call Yahoo directly with a crumb+cookie flow, and the crumb
+retry is capped at one — persistent 401s used to recurse into the 50-subrequest
+cap and 500 the page:
+
+```ts
+async function yahooAuthed(build, timeoutMs = 15000, retry = true): Promise<Response> {
+  if (!crumbCache.crumb || Date.now() > crumbCache.exp) { /* fetch crumb + cookie */ }
+  const r = await fetch(build(crumbCache.crumb!), { headers: { Cookie: crumbCache.cookie } });
+  if (r.status === 401 && retry) { crumbCache.exp = 0; return yahooAuthed(build, timeoutMs, false); } // single retry max
+  return r;
+}
+```
+
+## Search
+
+Fuzzy over the bundled 2898-symbol universe first (subsequence match, no dep),
+then merges live Yahoo search results when the local list misses:
+
+```ts
+export function suggestLocal(query: string, n = 8): SuggestRow[] { /* substring then subsequence */ }
+export async function suggest(query: string): Promise<SuggestRow[]> { /* local + live Yahoo, deduped */ }
+```
+
+## Deploy
+
+Needs `wrangler login` once.
+
+```
+cd indian-api && npx wrangler deploy
+cd digest
+printf '%s' "$SUBQ_API_KEY" | npx wrangler secret put SUBQ_API_KEY
+printf '%s' "$GROQ_API_KEY" | npx wrangler secret put GROQ_API_KEY
+npx wrangler deploy
+cd ../web
+NITRO_PRESET=cloudflare_module bun run build
+npx wrangler deploy --config .output/server/wrangler.json --name subq-web
+npx wrangler secret put SUBQ_API_KEY --name subq-web
+npx wrangler secret put GROQ_API_KEY --name subq-web
+```
+
+Secrets live only on Workers; keys only in local root `.env` (git-ignored).
+
+## Credits
+
+- Stock snapshot API: [0xramm/Indian-Stock-Market-API](https://github.com/0xramm/Indian-Stock-Market-API) (MIT) — vendored under `indian-api/`, deployed as-is.
+- Motion components: [ns-ui](https://design.helpmarq.com) by Nikolas Sapa (MIT).
+
+## Disclaimer
+
+Educational. Model judgments + delayed quotes are not financial advice. Verify
+before trading.
+
+---
+
+_Shivam Narkar. Building seams between systems that don't natively talk._
