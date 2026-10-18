@@ -76,6 +76,7 @@ export function ParticleDemo() {
       if (!adapter || destroyed) return;
       const device = await adapter.requestDevice();
       if (destroyed) { device.destroy(); return; }
+      device.addEventListener("uncapturederror", (e: any) => console.error("WebGPU:", e.error?.message ?? e.error));
       const context = canvas.getContext("webgpu") as any;
       if (!context) { setSupported(false); device.destroy(); return; }
       const format = nav.gpu.getPreferredCanvasFormat();
