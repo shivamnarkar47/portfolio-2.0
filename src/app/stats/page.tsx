@@ -93,17 +93,18 @@ export default function StatsPage() {
             {Object.entries(DATA.contact.social)
               .filter(([_, social]) => social.navbar)
               .map(([name, social]) => (
-                <Link
+                <a
                   key={name}
                   href={social.url}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className={buttonVariants({ variant: "outline" })}
                 >
                   <span className="flex items-center gap-2">
                     {social.icon({ className: "size-4" })}
                     {name}
                   </span>
-                </Link>
+                </a>
               ))}
           </div>
         </BlurFade>

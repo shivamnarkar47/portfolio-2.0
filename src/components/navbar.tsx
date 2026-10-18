@@ -345,7 +345,7 @@ export default function Navbar() {
               {socials.map(([name, social]) => (
                 <Tooltip key={name}>
                   <TooltipTrigger asChild>
-                    <Link
+                    <a
                       href={social.url}
                       aria-label={social.name}
                       target="_blank"
@@ -357,7 +357,7 @@ export default function Navbar() {
                       <span className="flex items-center justify-center size-4 [&_svg]:size-4 [&_svg]:max-h-4">
                         <NavIcon icon={social.icon} />
                       </span>
-                    </Link>
+                    </a>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
                     <p className="font-mono text-xs">{social.name} ↗</p>
