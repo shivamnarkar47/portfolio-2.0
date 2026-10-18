@@ -6,13 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DATA } from "@/data/resume";
 import { GitHubGraph } from "@/components/github-graph";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const GpuHeroBackground = dynamic(
+  () => import("@/components/webgpu/gpu-hero-background").then((m) => m.GpuHeroBackground),
+  { ssr: false }
+);
 
 const BLUR_FADE_DELAY = 0.04;
 
 export default function Page() {
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-16">
-      <section id="hero" className="pt-16 sm:pt-0">
+      <section id="hero" className="pt-16 sm:pt-0 relative overflow-hidden rounded-2xl">
+        <GpuHeroBackground className="absolute inset-0 -z-10" />
         <div className="w-full max-w-2xl space-y-6">
           <BlurFadeText
             delay={BLUR_FADE_DELAY}
