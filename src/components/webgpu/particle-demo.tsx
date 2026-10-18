@@ -36,6 +36,7 @@ export function ParticleDemo() {
     stateRef.current = s;
 
     const initParticles = (n: number) => {
+      if (!s.device) return;
       const init = new Float32Array(n * 4);
       for (let i = 0; i < n; i++) {
         init[i * 4] = Math.random() * 2 - 1;
