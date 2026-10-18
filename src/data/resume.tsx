@@ -158,6 +158,38 @@ export const DATA = {
   ],
   projects: [
     {
+      title: "ArthaSnap",
+      href: "https://github.com/shivamnarkar47/ArthaSnap",
+      dates: "October 2026 - Present",
+      active: true,
+      description:
+        "SubQ-powered NSE/BSE stock verdicts: type up to 5 symbols, get buy/watch/avoid with conviction, Groq-briefed latest news. TanStack Start SSR app on Cloudflare Workers backed by a Bun + Hono digest API (Yahoo snapshots/OHLC, SubQ packed multi-question scoring, Groq briefs) with a movers board over a ~2900-symbol universe and per-stock detail with charts.",
+      technologies: [
+        "TanStack Start",
+        "Cloudflare Workers",
+        "Bun",
+        "Hono",
+        "TypeScript",
+        "SubQ",
+        "Groq",
+        "Yahoo Finance",
+        "ns-ui",
+        "shadcn/ui",
+      ],
+      links: [
+        {
+          type: "Source",
+          href: "https://github.com/shivamnarkar47/ArthaSnap",
+          icon: <Icons.github className="size-3" />,
+        },
+        {
+          type: "Live",
+          href: "https://subq-web.shivamnarkar47.workers.dev",
+          icon: <Icons.globe className="size-3" />,
+        },
+      ],
+    },
+    {
       title: "MiniURL",
       href: "https://github.com/shivamnarkar47/MiniURL-shortener",
       dates: "September 2026",
