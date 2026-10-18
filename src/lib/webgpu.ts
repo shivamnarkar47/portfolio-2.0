@@ -1,4 +1,4 @@
-// ponytail: minimal WebGPU helpers; upgrade to @webgpu/types + full feature queries when /lab ships
+// ponytail: minimal WebGPU helpers
 export function hasWebGPU(): boolean {
   return typeof navigator !== "undefined" && "gpu" in navigator;
 }

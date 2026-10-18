@@ -1,5 +1,5 @@
 import { Icons } from "@/components/icons";
-import { HomeIcon, NotebookIcon, BarChartIcon, ImagesIcon, Sparkles } from "lucide-react";
+import { HomeIcon, NotebookIcon, BarChartIcon, ImagesIcon } from "lucide-react";
 
 export const DATA = {
   name: "Shivam Narkar",
@@ -39,7 +39,6 @@ export const DATA = {
     { href: "/blog", icon: (p: any) => <NotebookIcon {...p} />, label: "Blog" },
     { href: "/stats", icon: BarChartIcon, label: "Stats" },
     { href: "/showcase", icon: ImagesIcon, label: "Showcase" },
-    { href: "/lab", icon: Sparkles, label: "Lab" },
   ],
   contact: {
     email: "shivamnarkar16@gmail.com",
